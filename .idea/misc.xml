@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Appdata/Domenico/Android/Sdk/platforms/android-32/data/res/layout/simple_spinner_dropdown_item.xml" value="0.18958333333333333" />
+        <entry key="..\:/Appdata/Domenico/Android/Sdk/platforms/android-32/data/res/layout/simple_spinner_item.xml" value="0.18958333333333333" />
+        <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/drawable/Iconbg.xml" value="0.1975" />
+        <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/drawable/ic_baseline_menu_24.xml" value="0.11" />
+        <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/drawable/icon.xml" value="0.102" />
+        <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout-land/activity_home.xml" value="0.3001841620626151" />
+        <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/activity_color_picker.xml" value="0.18958333333333333" />
+        <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/activity_games.xml" value="0.25" />
+        <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/activity_home.xml" value="0.18" />
+        <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/activity_main.xml" value="0.18958333333333333" />
+        <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/activity_match.xml" value="0.18958333333333333" />
+        <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/activity_menu.xml" value="0.4512725015518312" />
+        <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/content_home.xml" value="0.18958333333333333" />
+        <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/fragment_first.xml" value="0.18958333333333333" />
+        <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/fragment_second.xml" value="0.18958333333333333" />
+        <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.1975" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="JDK" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>
