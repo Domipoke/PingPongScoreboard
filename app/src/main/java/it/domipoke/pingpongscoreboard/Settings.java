@@ -11,5 +11,22 @@ class Settings {
     public Settings() {
         switch_side_each_set=true;
         winning_at=11;
+        
     }
+
+    public static Settings DefaultSingle() {
+        Settings s = new Settings();
+        s.switch_side_each_set=true;
+        s.winning_at=SINGLE_WINNING_POINTS;
+        return s;
+    }
+
+    public static Settings DefaultDouble() {
+        Settings s = new Settings();
+        s.switch_side_each_set=true;
+        s.winning_at=DOUBLE_WINNING_POINTS;
+        return s;
+    }
+
+
 }

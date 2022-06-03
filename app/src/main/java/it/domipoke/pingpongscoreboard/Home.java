@@ -66,6 +66,7 @@ public class Home extends AppCompatActivity {
                 e.printStackTrace();
             }
             if (pls==2 | pls==4) {
+                g.players=g.getPlayers();
                 if (pls==2) StartSingleMatch();
                 else if (pls==4) StartDoubleMatch();
             }else {

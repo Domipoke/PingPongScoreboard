@@ -1,6 +1,9 @@
 package it.domipoke.pingpongscoreboard;
 
+import android.content.Context;
 import android.graphics.Color;
+
+import androidx.appcompat.app.AlertDialog;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -9,14 +12,16 @@ import java.util.stream.Collectors;
 
 class Game {
 
-   public long id;
-   public int set;
-   public int score1;
-   public int score2;
-   //STG
+    public long id;
+    public int set;
+    public int score1;
+    public int score2;
+    //STG
 
-   public List<Player> players;
+    public List<Player> players;
     public Settings settings;
+    public List<Set> sets;
+    public Set currentset;
 
 
     public Game() {
@@ -29,13 +34,31 @@ class Game {
       players.add(new Player());
       players.add(new Player());
       players.add(new Player());
+      sets=new ArrayList<Set>();
+      currentset=new Set();
    }
 
-   public void updateScore(int team,int point) {
+   public void DefaultSetSingle() {
+        settings=Settings.DefaultSingle();
+   }
+   public void DefaultSetDouble() {
+        settings=Settings.DefaultDouble();
+   }
+   public void updateScore(int team, int point, Context ctx) {
       if (team==1) {
          score1=score1+point;
       } else if (team==2) {
          score2=score2+point;
+      }
+      if (score1>=settings.winning_at|score2>=settings.winning_at) {
+          currentset.EndNow();
+          sets.add(currentset);
+          currentset=new Set();
+          AlertDialog.Builder b = new AlertDialog.Builder(ctx);
+          b.setPositiveButton("OK", ()->{
+              nextSet();
+              currentset.StartNow();
+          });
       }
    }
 
