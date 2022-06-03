@@ -15,22 +15,29 @@ class Player {
    public String name;
    public int wins;
    public int lose;
+   public String number;
 
 
-    public Player() {color=Color.WHITE;}
+    public Player() {color=Color.WHITE;wins=0;lose=0;number="";}
     public void save(File path, String n) {
+        File p = new File(path +"/"+File.separator+n+".json");
         if (!exists(path, n)) {
-            File p = new File(path +"/"+File.separator+n+".json");
             try {
                 p.createNewFile();
-                String s = Parser.StringifyPlayer(this);
-                FileWriter fw = new FileWriter(p);
-                fw.write(s);
-                fw.close();
-            } catch (IOException | JSONException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        String s = null;
+        try {
+            s = Parser.StringifyPlayer(this);
+            FileWriter fw = new FileWriter(p);
+            fw.write(s);
+            fw.close();
+        } catch (JSONException | IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public static boolean exists(File path,String n) {

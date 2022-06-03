@@ -46,26 +46,16 @@ class Parser {
                     List<Game> games = new ArrayList<Game>();
                     JSONArray gja = new JSONArray(jo.get("data").toString());
                     for (int i = 0;i<gja.length();i++) {
-                        Game p = new Game();
-                        JSONObject o = new JSONObject(gja.get(i).toString());
-                        if (o.has("id")) {
-                            p.id = (int) o.get("id");
-                        }
-                        if (o.has("set")) {
-                            p.set = (int) o.get("set");
-                        }
-                        if (o.has("score1")) {
-                            p.score1 = (int) o.get("score1");
-                        }
-                        if (o.has("score2")) {
-                            p.score2 = (int) o.get("score2");
-                        }
-                        if (o.has("players")) {
-                            p.players = new ArrayList<Player>(parseString(o.get("players").toString()));
-                        }
-                        games.add(p);
+                        games.add(parseGame(gja.get(i).toString()));
                     }
                     return games;
+                case "setting":
+                    List<Settings> stgs = new ArrayList<Settings>();
+                    JSONArray sja = new JSONArray(jo.get("data").toString());
+                    for (int i = 0;i<sja.length();i++) {
+                        stgs.add(parseSetting(sja.get(i).toString()));
+                    }
+                    return stgs;
             }
 
         }catch (JSONException e) {
@@ -73,7 +63,7 @@ class Parser {
         }
         return null;
     }
-
+    //
     public static Player parsePlayer(String string) {
         Player p = new Player();
         try {
@@ -92,11 +82,51 @@ class Parser {
             if (o.has("lose")) {
                 p.lose = (int) o.get("lose");
             }
+            if (o.has("number")) {
+                p.number = o.get("number").toString();
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return  p;
     }
+    public static Game parseGame(String string) {
+        Game p = new Game();
+        try {
+            JSONObject o = new JSONObject(string);
+            if (o.has("id")) {
+                p.id = (int) o.get("id");
+            }
+            if (o.has("set")) {
+                p.set = (int) o.get("set");
+            }
+            if (o.has("score1")) {
+                p.score1 = (int) o.get("score1");
+            }
+            if (o.has("score2")) {
+                p.score2 = (int) o.get("score2");
+            }
+            if (o.has("players")) {
+                p.players = new ArrayList<Player>(parseString(o.get("players").toString()));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return p;
+    }
+    public static Settings parseSetting(String string) {
+        Settings s = new Settings();
+        try {
+            JSONObject o = new JSONObject(string);
+            if (o.has("switch_side_each_set")) {
+                s.switch_side_each_set = (boolean) o.get("switch_side_each_set");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return s;
+    }
+    //
     public static String StringifyPlayer(List<Player> ps) throws JSONException {
         JSONObject res = new JSONObject();
         res.put("type", "player");
@@ -128,6 +158,7 @@ class Parser {
             o.put("name", p.name);
             o.put("wins", p.wins);
             o.put("lose", p.lose);
+            o.put("number", p.number);
         } catch (JSONException e) {
             System.out.println("stringify error");
             e.printStackTrace();
@@ -157,4 +188,54 @@ class Parser {
         res.put("data",ja);
         return res.toString();
     }
+    public static String StringifyGame(Game g) throws JSONException {
+        JSONObject res = new JSONObject();
+        res.put("type", "game");
+        JSONArray ja = new JSONArray();
+        JSONObject o = new JSONObject();
+        try {
+            o.put("id", g.id);
+            o.put("set", g.set);
+            o.put("score1", g.score1);
+            o.put("score2", g.score2);
+            o.put("players", new JSONObject(StringifyPlayer(g.players)));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        ja.put(o);
+        res.put("data",ja);
+        return res.toString();
+    }
+    public static String StringifySetting(List<Settings> ss) throws JSONException {
+        JSONObject res = new JSONObject();
+        res.put("type", "game");
+        JSONArray ja = new JSONArray();
+
+        ss.forEach(p-> {
+            JSONObject o = new JSONObject();
+            try {
+                o.put("switch_side_each_set", p.switch_side_each_set);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            ja.put(o);
+        });
+        res.put("data",ja);
+        return res.toString();
+    }
+    public static String StringifySetting(Settings s) throws JSONException {
+        JSONObject res = new JSONObject();
+        res.put("type", "game");
+        JSONArray ja = new JSONArray();
+        JSONObject o = new JSONObject();
+        try {
+            o.put("switch_side_each_set", s.switch_side_each_set);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        ja.put(o);
+        res.put("data",ja);
+        return res.toString();
+    }
+
 }

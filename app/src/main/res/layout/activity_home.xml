@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="#FFFFFF"
     android:fitsSystemWindows="true"
-    tools:context=".Match">
+    tools:context=".SingleMatch">
 
 
     <TextView
@@ -59,7 +59,7 @@
         app:layout_constraintTop_toTopOf="@+id/fastgameplayer3" />
 
     <Button
-        android:id="@+id/Inizia"
+        android:id="@+id/startmatch"
         android:layout_width="134dp"
         android:layout_height="54dp"
         android:layout_marginTop="48dp"
@@ -69,4 +69,13 @@
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/fastgameplayer3" />
+
+    <Button
+        android:id="@+id/Settings"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/impostazioni"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

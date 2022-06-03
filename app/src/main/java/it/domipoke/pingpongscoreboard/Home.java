@@ -2,7 +2,10 @@ package it.domipoke.pingpongscoreboard;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.InputType;
 import android.widget.ArrayAdapter;
@@ -35,7 +38,7 @@ public class Home extends AppCompatActivity {
     public Button pl3;
     public Button pl4;
 
-    public Game g = new Game();
+    public Game g;
     //public ImageButton menu;
 
 
@@ -45,6 +48,8 @@ public class Home extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        g = new Game();
         System.out.println("Started: " + this.getExternalFilesDir(null).toString());
         for (String p : new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}) {
             if (ActivityCompat.checkSelfPermission(this, p) == PackageManager.PERMISSION_DENIED) {
@@ -53,8 +58,34 @@ public class Home extends AppCompatActivity {
         }
         SetupPortrait();
         checkFiles();
-
+        findViewById(R.id.startmatch).setOnClickListener(view ->{
+            int pls = g.howmanyPlayers();
+            try {
+                Utils.Log(String.valueOf(Parser.StringifyGame(g)));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            if (pls==2 | pls==4) {
+                if (pls==2) StartSingleMatch();
+                else if (pls==4) StartDoubleMatch();
+            }else {
+                if (pls <= 0) {
+                    Utils.FastToast(this, "Non ci sono gicoatori in questa partita", Toast.LENGTH_SHORT);
+                } else if (pls == 3 | pls == 1) {
+                    Utils.FastToast(this, "Il numero di giocatori è dispari", Toast.LENGTH_SHORT);
+                } else if (pls > 4) {
+                    Utils.FastToast(this, "Ci sono troppi giocatori", Toast.LENGTH_SHORT);
+                }
+            }
+        });
+        findViewById(R.id.Settings).setOnClickListener(view -> {
+            Intent i = new Intent(this, Menu.class);
+            startActivity(i);
+        });
     }
+
+
+
     public void SetupPortrait() {
         System.out.println("spawned");
 
@@ -109,6 +140,7 @@ public class Home extends AppCompatActivity {
             if (n.equalsIgnoreCase("") | n.matches("")) n = "player";
             n=n.toLowerCase();
             btn.setBackgroundColor(icolor.c);
+            btn.setText(n);
             Player pl = new Player();
             pl.color = icolor.c;
             pl.name = n;
@@ -116,9 +148,9 @@ public class Home extends AppCompatActivity {
                 pl.save(this.getExternalFilesDir("players"), n);
             } else {
                 AlertDialog.Builder b2 = new AlertDialog.Builder(ctx);
-                b2.setTitle("Vuoi sostituire? ");
+                b2.setTitle("Vuoi sostituire?");
                 String finalN = n;
-                b2.setPositiveButton("OK", (dI2, i2) -> pl.save(this.getExternalFilesDir("players"), finalN));
+                b2.setPositiveButton("SI", (dI2, i2) -> {pl.save(this.getExternalFilesDir("players"), finalN);btn.setBackgroundColor(icolor.c);btn.setText(finalN);});
                 b2.setNegativeButton("NO", (dI3,i3)-> dI3.cancel());
                 b2.create().show();
             }
@@ -135,6 +167,11 @@ public class Home extends AppCompatActivity {
             btn.setText(pl.name);
             g.setPlayer(playeri-1,pl);
         });
+        builder.setNegativeButton("CLEAR", ((dialogInterface, i) -> {
+            g.setPlayer(playeri-1,new Player());
+            btn.setText("");
+            btn.setBackgroundColor(Color.WHITE);
+        }));
         AlertDialog dialog = builder.create();
         dialog.show();
         System.out.println("Dialog showed");
@@ -171,23 +208,13 @@ public class Home extends AppCompatActivity {
         System.out.println("Dialog showed");
         return true;
     }
-    /*
-    private void init() {
-        menu = findViewById(R.id.gotomenu);
-        menu.setOnClickListener(v -> {
-            initMenu();
-        });
-
-
-
-    }*/
     private void checkFiles() {
         File fd = this.getExternalFilesDir(null);
         if (fd.isDirectory()&&!fd.exists()) {
             boolean mkdirs = fd.mkdirs();
             System.out.println("Exist Dir: "+mkdirs);
         }
-        String[] files = {"stgps/default.json","players"};
+        String[] files = {"stgps/default.json","players","games"};
         try {
             createFolders(this.getExternalFilesDir(null),files);
             File f = new File(this.getExternalFilesDir("stgps" ) + "/" + File.separator + "default.json");
@@ -204,7 +231,7 @@ public class Home extends AppCompatActivity {
         } catch (IOException | JSONException e) {
             e.printStackTrace();
 
-            Toast.makeText(this, "Non è stato possibile creare le cartelle", Toast.LENGTH_SHORT).show();
+            Utils.FastToast(this, "Non è stato possibile creare le cartelle", Toast.LENGTH_SHORT);
         }
     }
 
@@ -222,12 +249,23 @@ public class Home extends AppCompatActivity {
             }
         }
     }
-    /*
-    private void initMenu() {
-        Intent i = new Intent(this, Menu.class);
+    private void StartSingleMatch() {
+        Intent i = new Intent(this, SingleMatch.class);
+        try {
+            i.putExtra("game", Parser.StringifyGame(g));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         startActivity(i);
-    }*/
-
-
+    }
+    private void StartDoubleMatch() {
+        Intent i = new Intent(this, DoubleMatch.class);
+        try {
+            i.putExtra("game", Parser.StringifyGame(g));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        startActivity(i);
+    }
 
 }

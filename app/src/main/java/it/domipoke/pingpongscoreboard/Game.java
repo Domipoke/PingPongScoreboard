@@ -1,8 +1,11 @@
 package it.domipoke.pingpongscoreboard;
 
+import android.graphics.Color;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 class Game {
 
@@ -11,11 +14,12 @@ class Game {
    public int score1;
    public int score2;
    //STG
-   public boolean switch_each_set=true;
+
    public List<Player> players;
+    public Settings settings;
 
 
-   public Game() {
+    public Game() {
       id=new Date().getTime();
       set=0;
       score1=0;
@@ -44,6 +48,13 @@ class Game {
 
 
    public void setPlayer(int i, Player pl) {
-
+      players.set(i,pl);
    }
+
+    public List<Player> getPlayers() {
+       return players.stream().filter(x->x.color!=Color.WHITE).collect(Collectors.toList());
+    }
+    public int howmanyPlayers() {
+       return getPlayers().size();
+    }
 }
