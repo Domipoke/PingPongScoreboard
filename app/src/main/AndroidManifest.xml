@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="it.domipoke.pingpongscoreboard" >
+    package="it.domipoke.pingpongscoreboard">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:allowBackup="true"
@@ -13,7 +14,19 @@
         android:roundIcon="@drawable/_304494"
         android:screenOrientation="landscape"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".UserPage"
+            android:exported="false" />
+        <activity
+            android:name=".Login"
+            android:exported="false" />
+        <activity
+            android:name=".watch"
+            android:exported="false" />
+        <activity
+            android:name=".History"
+            android:exported="false" />
         <activity
             android:name=".DoubleMatch"
             android:exported="false" />
@@ -21,22 +34,22 @@
             android:name=".SingleMatch"
             android:exported="false" />
         <activity
-            android:name=".Games"
-            android:exported="false" />
-        <activity
             android:name=".Menu"
             android:exported="false" />
         <activity
             android:name=".Home"
             android:exported="true"
-            android:label="@string/title_activity_home"
-            android:theme="@style/AppTheme" >
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
     </application>
 
 </manifest>

@@ -150,6 +150,12 @@ class Parser {
             if (o.has("switch_side_each_set")) {
                 s.switch_side_each_set = (boolean) o.get("switch_side_each_set");
             }
+            if (o.has("change_serve_each")) {
+                s.change_serve_each = (int) o.get("change_serve_each");
+            }
+            if (o.has("winning_at")) {
+                s.winning_at = (int) o.get("winning_at");
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -223,14 +229,18 @@ class Parser {
         res.put("type", "game");
         JSONArray ja = new JSONArray();
 
-        gs.forEach(p-> {
+        gs.forEach(g-> {
             JSONObject o = new JSONObject();
             try {
-                o.put("id", p.id);
-                o.put("set", p.set);
-                o.put("score1", p.score1);
-                o.put("score2", p.score2);
-                o.put("players", StringifyPlayer(p.players));
+                o.put("id", g.id);
+                o.put("set", g.set);
+                o.put("score1", g.score1);
+                o.put("score2", g.score2);
+                //Utils.Log("stringed pl : "+StringifyPlayer(g.players));
+                o.put("players", new JSONObject(StringifyPlayer(g.players)));
+                o.put("sets", new JSONObject(StringifySet(g.sets)));
+                o.put("currentset", new JSONObject(StringifySet(g.currentset)));
+                o.put("settings", new JSONObject(StringifySetting(g.settings)));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -253,6 +263,7 @@ class Parser {
             o.put("players", new JSONObject(StringifyPlayer(g.players)));
             o.put("sets", new JSONObject(StringifySet(g.sets)));
             o.put("currentset", new JSONObject(StringifySet(g.currentset)));
+            o.put("settings", new JSONObject(StringifySetting(g.settings)));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -270,6 +281,7 @@ class Parser {
             try {
                 o.put("switch_side_each_set", p.switch_side_each_set);
                 o.put("winning_at",p.winning_at);
+                o.put("change_serve_each",p.change_serve_each);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -286,6 +298,7 @@ class Parser {
         try {
             o.put("switch_side_each_set", s.switch_side_each_set);
             o.put("winning_at", s.winning_at);
+            o.put("change_serve_each", s.change_serve_each);
         } catch (JSONException e) {
             e.printStackTrace();
         }

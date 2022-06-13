@@ -22,6 +22,7 @@ class Game {
     public Settings settings;
     public List<Set> sets;
     public Set currentset;
+    public String web_id;
 
 
     public Game() {
@@ -36,6 +37,7 @@ class Game {
       players.add(new Player());
       sets=new ArrayList<Set>();
       currentset=new Set();
+      settings=new Settings();
    }
 
    public void DefaultSetSingle() {
@@ -50,23 +52,20 @@ class Game {
       } else if (team==2) {
          score2=score2+point;
       }
-      if (score1>=settings.winning_at|score2>=settings.winning_at) {
-          currentset.EndNow();
-          sets.add(currentset);
-          currentset=new Set();
-          AlertDialog.Builder b = new AlertDialog.Builder(ctx);
-          b.setPositiveButton("OK", ()->{
-              nextSet();
-              currentset.StartNow();
-          });
-      }
+
    }
 
 
    public void nextSet() {
-      score1=0;
-      score2=0;
-      set=set+1;
+        currentset.score1=score1;
+        currentset.score2=score2;
+        currentset.EndNow();
+        sets.add(currentset);
+        currentset=new Set();
+        score1=0;
+        score2=0;
+        set=set+1;
+        currentset.StartNow();
    }
 
 

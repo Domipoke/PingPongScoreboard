@@ -16,7 +16,7 @@ class Player {
    public int wins;
    public int lose;
    public String number;
-
+   public String uid;
 
     public Player() {color=Color.WHITE;wins=0;lose=0;number="";}
     public void save(File path, String n) {

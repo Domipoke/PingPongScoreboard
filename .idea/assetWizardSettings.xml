@@ -327,7 +327,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/E:/Tutti%20i%20programmi/AndroidStudio/plugins/android/lib/android.jar!/images/material/icons/materialicons/menu/baseline_menu_24.xml" />
+                                      <entry key="url" value="file:/$PROJECT_DIR$/../../../Appdata/Domenico/Android/Sdk/icons/material/materialicons/history/baseline_history_24.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -338,7 +338,7 @@
                         <option name="values">
                           <map>
                             <entry key="color" value="ffffff" />
-                            <entry key="outputName" value="ic_baseline_menu_24" />
+                            <entry key="outputName" value="ic_baseline_history_24" />
                             <entry key="sourceFile" value="E:\DesktopDomenico\bot\PingPongScoreboard" />
                           </map>
                         </option>

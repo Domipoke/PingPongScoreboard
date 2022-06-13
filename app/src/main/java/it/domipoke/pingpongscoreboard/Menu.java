@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Menu extends AppCompatActivity {
@@ -95,8 +96,8 @@ public class Menu extends AppCompatActivity {
     }
 
     private void reloadPresets(Spinner presets) {
-        List<String> stgprs = Arrays.stream(new File(this.getExternalFilesDir("stgps").toURI()).listFiles()).map(x -> new StringBuilder().append(x.getName().split(".json")).toString()).collect(Collectors.toList());
-        stgprs.add(0,"Aggiungi");
+        List<String> stgprs = Arrays.stream(Objects.requireNonNull(new File(this.getExternalFilesDir("stgps").toURI()).listFiles())).map(x -> (Arrays.toString(x.getName().split(".json"))).replaceAll("[^a-zA-Z]", "")).collect(Collectors.toList());
+        stgprs.add("Aggiungi");
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, stgprs);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         presets.setAdapter(adapter);
@@ -120,7 +121,8 @@ public class Menu extends AppCompatActivity {
         TextView t = new TextView(this);
         t.setText(o.name);
 
-        NumberPicker e = new NumberPicker(this);
+        EditText e = new EditText(this);
+        e.setInputType(InputType.TYPE_CLASS_NUMBER);
         ll.addView(t);
         ll.addView(e);
         return ll;

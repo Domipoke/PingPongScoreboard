@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "473052494821",
+    "firebase_url": "https://gp4e-6a225.firebaseio.com",
+    "project_id": "gp4e-6a225",
+    "storage_bucket": "gp4e-6a225.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:473052494821:android:7922d01d93e98595680d0c",
+        "android_client_info": {
+          "package_name": "com.gp4e.gp4e"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "473052494821-hl426pj4hiti0kjrokeqf277sg3mim8s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCnyVeuMNfIEPrB4GFnU3gepf6FMRctrWw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "473052494821-hl426pj4hiti0kjrokeqf277sg3mim8s.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:473052494821:android:64ee41e68a62683f680d0c",
+        "android_client_info": {
+          "package_name": "it.domipoke.pingpongscoreboard"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "473052494821-hl426pj4hiti0kjrokeqf277sg3mim8s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCnyVeuMNfIEPrB4GFnU3gepf6FMRctrWw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "473052494821-hl426pj4hiti0kjrokeqf277sg3mim8s.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
