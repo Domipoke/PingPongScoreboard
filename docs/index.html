@@ -12,7 +12,7 @@
         function getUrlVars()  {
             var vars = [], hash;
             var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-            for(var i = 0; i < hashes.length; i++)
+            for (var i = 0; i < hashes.length; i++)
             {
                 hash = hashes[i].split('=');
                 vars.push(hash[0]);
@@ -21,7 +21,81 @@
             return vars;
         }
         const firebaseConfig = {
-
+          "project_info": {
+            "project_number": "473052494821",
+            "firebase_url": "https://gp4e-6a225.firebaseio.com",
+            "project_id": "gp4e-6a225",
+            "storage_bucket": "gp4e-6a225.appspot.com"
+          },
+          "client": [
+            {
+              "client_info": {
+                "mobilesdk_app_id": "1:473052494821:android:7922d01d93e98595680d0c",
+                "android_client_info": {
+                  "package_name": "com.gp4e.gp4e"
+                }
+              },
+              "oauth_client": [
+                {
+                  "client_id": "473052494821-hl426pj4hiti0kjrokeqf277sg3mim8s.apps.googleusercontent.com",
+                  "client_type": 3
+                }
+              ],
+              "api_key": [
+                {
+                  "current_key": "AIzaSyCnyVeuMNfIEPrB4GFnU3gepf6FMRctrWw"
+                }
+              ],
+              "services": {
+                "appinvite_service": {
+                  "other_platform_oauth_client": [
+                    {
+                      "client_id": "473052494821-hl426pj4hiti0kjrokeqf277sg3mim8s.apps.googleusercontent.com",
+                      "client_type": 3
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "client_info": {
+                "mobilesdk_app_id": "1:473052494821:android:64ee41e68a62683f680d0c",
+                "android_client_info": {
+                  "package_name": "it.domipoke.pingpongscoreboard"
+                }
+              },
+              "oauth_client": [
+                {
+                  "client_id": "473052494821-v5jokfsn75jvvcruhkl3u9lbotc6s7io.apps.googleusercontent.com",
+                  "client_type": 1,
+                  "android_info": {
+                    "package_name": "it.domipoke.pingpongscoreboard",
+                    "certificate_hash": "e74c47eef33eb4b6981c9cd026e69512b5c2dae9"
+                  }
+                },
+                {
+                  "client_id": "473052494821-hl426pj4hiti0kjrokeqf277sg3mim8s.apps.googleusercontent.com",
+                  "client_type": 3
+                }
+              ],
+              "api_key": [
+                {
+                  "current_key": "AIzaSyCnyVeuMNfIEPrB4GFnU3gepf6FMRctrWw"
+                }
+              ],
+              "services": {
+                "appinvite_service": {
+                  "other_platform_oauth_client": [
+                    {
+                      "client_id": "473052494821-hl426pj4hiti0kjrokeqf277sg3mim8s.apps.googleusercontent.com",
+                      "client_type": 3
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "configuration_version": "1"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -41,8 +115,8 @@
                 team1 = data["players"]["player1"]["name"]+" "+data["players"]["player3"]["name"]
                 team2 = data["players"]["player2"]["name"]+" "+data["players"]["player4"]["name"]
             }
-            document.getElementById("name1").innerHTML=
-            document.getElementById("name2").innerHTML=
+            document.getElementById("name1").innerHTML=team1
+            document.getElementById("name2").innerHTML=team2
 
             document.getElementById("set1").innerHTML=w1
             document.getElementById("set2").innerHTML=w2
