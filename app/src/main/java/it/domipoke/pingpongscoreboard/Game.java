@@ -7,7 +7,9 @@ import androidx.appcompat.app.AlertDialog;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 class Game {
@@ -78,5 +80,19 @@ class Game {
     }
     public int howmanyPlayers() {
        return getPlayers().size();
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> m = new HashMap<>();
+        m.put("currentset", this.currentset);
+        m.put("id", this.id);
+        m.put("players", Player.toMap(this.players));
+        m.put("score1", this.score1);
+        m.put("score2", this.score2);
+        m.put("set", this.set);
+        m.put("sets", Set.toMapList(this.sets));
+        m.put("settings", Settings.toMap(this.settings));
+        m.put("web_id", this.web_id);
+        return m;
     }
 }

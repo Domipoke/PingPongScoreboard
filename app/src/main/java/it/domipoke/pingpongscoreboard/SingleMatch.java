@@ -13,12 +13,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.json.JSONException;
-import org.w3c.dom.Text;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import it.domipoke.pingpongscoreboard.Utils;
 
 public class SingleMatch extends AppCompatActivity {
 
@@ -36,6 +33,7 @@ public class SingleMatch extends AppCompatActivity {
     public TextView Tscore2;
     private Object VoiceRecognition;
     public boolean share;
+    public String wid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +44,9 @@ public class SingleMatch extends AppCompatActivity {
         share = (boolean) b.get("share");
 
         String s = b.get("game").toString();
+        if (share) {
+            wid = (String) b.get("web_id");
+        }
         Utils.Log("Single Match -> s :"+s);
         List<Game> gs = Parser.parseString(s);
         g = gs.get(0);
@@ -89,10 +90,6 @@ public class SingleMatch extends AppCompatActivity {
         //
         brempl1.setOnClickListener(view -> {if (g.score1>0) g.updateScore(1, -1, this);updateScoreText();});
         brempl2.setOnClickListener(view -> {if (g.score2>0) g.updateScore(2, -1, this);updateScoreText();});
-        if (share) {
-            FireDataBase db = new FireDataBase();
-            g = db.ShareMatch(g);
-        }
     }
 
     private void updateScoreText() {
@@ -116,6 +113,10 @@ public class SingleMatch extends AppCompatActivity {
             });
             b3.setNegativeButton("NO", (dI3,i3)-> dI3.cancel());
             b3.create().show();
+        }
+        if (share) {
+            FireDataBase db = new FireDataBase();
+            db.updateGame(wid, g);
         }
     }
 

@@ -1,5 +1,5 @@
 <html>
-  <body>
+<body>
     <table id="match" match="">
       <tr><span id="updates"></span></tr>
       <tr><td id="name1"><td><td id="name2"></td></tr>
@@ -9,15 +9,48 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script>
-      import "firebase/firestore";
-      const firebaseConfig = {
-          
-      };
-      firebase.initializeApp(firebaseConfig);
-      const db = firebase.firestore();
-      db.collection("matches").doc("SF").onSnapshot((doc) => {
-        
-    });
+        function getUrlVars()  {
+            var vars = [], hash;
+            var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+            for(var i = 0; i < hashes.length; i++)
+            {
+                hash = hashes[i].split('=');
+                vars.push(hash[0]);
+                vars[hash[0]] = hash[1];
+            }
+            return vars;
+        }
+        import "firebase/firestore";
+        const firebaseConfig = {
+
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        var id=getUrlVars()["matchid"];
+        db.collection("matches").doc(id).onSnapshot((doc) => {
+            var data = doc.data()
+            var sets = data["sets"]
+            var w1 = sets.filter(x=>x.score1>x.score2).length
+            var w2 = sets.filter(x=>x.score2>x.score1).length
+            var pls = data["players"].length
+            var team1="";
+            var team2="";
+            if (pls==2) {
+                team1 = data["players"]["player1"]["name"]
+                team2 = data["players"]["player2"]["name"]
+            } else if (pls==4) {
+                team1 = data["players"]["player1"]["name"]+" "+data["players"]["player3"]["name"]
+                team2 = data["players"]["player2"]["name"]+" "+data["players"]["player4"]["name"]
+            }
+            document.getElementById("name1").innerHTML=
+            document.getElementById("name2").innerHTML=
+
+            document.getElementById("set1").innerHTML=w1
+            document.getElementById("set2").innerHTML=w2
+
+            document.getElementById("score1").innerHTML=data["score1"]
+            document.getElementById("score2").innerHTML=data["score2"]
+        });
     </script>
-  </body>
+</body>
 </html>

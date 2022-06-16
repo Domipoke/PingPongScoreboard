@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -33,6 +34,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -45,6 +48,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.security.cert.CertPathBuilder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -55,6 +59,7 @@ public class Home extends AppCompatActivity {
     private static final int REQ_ONE_TAP = 2;
     private static final int REQ_USER_PAGE = 3;
     private static final int RC_SIGN_IN = 4;
+    private static final int REQ_LOG_OUT = 5;
 
     public Button pl1;
     public Button pl2;
@@ -72,14 +77,18 @@ public class Home extends AppCompatActivity {
     private SignInClient oneTapClient;
     private GoogleSignInClient mGoogleSignInClient;
 
+    public List<String> Savedpls;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setupFirebase();
         g = new Game();
         System.out.println("Started: " + this.getExternalFilesDir(null).toString());
-        for (String p : new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}) {
+        //Manifest.permission.RECORD_AUDIO
+        for (String p : new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, }) {
             if (ActivityCompat.checkSelfPermission(this, p) == PackageManager.PERMISSION_DENIED) {
                 ActivityCompat.requestPermissions(Home.this, new String[]{p}, PERMISSION_REQUEST_CODE);
             }
@@ -98,6 +107,7 @@ public class Home extends AppCompatActivity {
                 if (pls==2) StartSingleMatch(false);
                 else StartDoubleMatch(false);
                 clearPlayersBox();
+                Savedpls = Arrays.stream(Objects.requireNonNull(new File(ctx.getExternalFilesDir("players").toURI()).listFiles())).map(x -> (Arrays.toString(x.getName().split(".json"))).replaceAll("[^a-zA-Z]", "")).collect(Collectors.toList());
             }else {
                 if (pls <= 0) {
                     Utils.FastToast(this, "Non ci sono gicoatori in questa partita", Toast.LENGTH_SHORT);
@@ -112,24 +122,43 @@ public class Home extends AppCompatActivity {
             Utils.AreYouSure(ctx, "Vuoi condividere?", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
-                    int pls = g.howmanyPlayers();
-                    try {
-                        Utils.Log(Parser.StringifyGame(g));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    if (pls==2 | pls==4) {
-                        g.players=g.getPlayers();
-                        if (pls==2) StartSingleMatch(true);
-                        else StartDoubleMatch(true);
-                        clearPlayersBox();
-                    }else {
-                        if (pls <= 0) {
-                            Utils.FastToast(ctx, "Non ci sono gicoatori in questa partita", Toast.LENGTH_SHORT);
-                        } else if (pls == 3 | pls == 1) {
-                            Utils.FastToast(ctx, "Il numero di giocatori è dispari", Toast.LENGTH_SHORT);
+                    boolean bl = FirebaseAuth.getInstance().getCurrentUser().isEmailVerified();
+                    Utils.Log(String.valueOf(bl));
+                    if (bl) {
+                        int pls = g.howmanyPlayers();
+                        try {
+                            Utils.Log(Parser.StringifyGame(g));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        if (pls == 2 | pls == 4) {
+                            g.players = g.getPlayers();
+                            FireDataBase fdb = new FireDataBase();
+                            if (pls == 2) fdb.ShareMatch(g,ctx,0);
+                            else fdb.ShareMatch(g,ctx,1);
+                            clearPlayersBox();
+                            Savedpls = Arrays.stream(Objects.requireNonNull(new File(ctx.getExternalFilesDir("players").toURI()).listFiles())).map(x -> (Arrays.toString(x.getName().split(".json"))).replaceAll("[^a-zA-Z]", "")).collect(Collectors.toList());
                         } else {
-                            Utils.FastToast(ctx, "Ci sono troppi giocatori", Toast.LENGTH_SHORT);
+                            if (pls <= 0) {
+                                Utils.FastToast(ctx, "Non ci sono gicoatori in questa partita", Toast.LENGTH_SHORT);
+                            } else if (pls == 3 | pls == 1) {
+                                Utils.FastToast(ctx, "Il numero di giocatori è dispari", Toast.LENGTH_SHORT);
+                            } else {
+                                Utils.FastToast(ctx, "Ci sono troppi giocatori", Toast.LENGTH_SHORT);
+                            }
+                        }
+                    } else {
+                        if (FirebaseAuth.getInstance().getCurrentUser().isEmailVerified()) {
+                            FirebaseAuth.getInstance().getCurrentUser().sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (!task.isSuccessful()) {
+                                        task.getException().printStackTrace();
+                                    }
+                                }
+                            });
+                            Utils.FastToast(ctx, "Verifica la tua e-mail", Toast.LENGTH_SHORT);
+                            Utils.FastToast(ctx, "Controlla nello spam :(", Toast.LENGTH_LONG);
                         }
                     }
                 }
@@ -151,8 +180,30 @@ public class Home extends AppCompatActivity {
         });
         */
         setupLogin();
+        Savedpls = Arrays.stream(Objects.requireNonNull(new File(this.getExternalFilesDir("players").toURI()).listFiles())).map(x -> (Arrays.toString(x.getName().split(".json"))).replaceAll("[^a-zA-Z]", "")).collect(Collectors.toList());
+    }
+
+    private void setupFirebase() {
+        /*
+        FirebaseOptions.Builder b = new FirebaseOptions.Builder();
+        b.setApiKey("AIzaSyCnyVeuMNfIEPrB4GFnU3gepf6FMRctrWw");
+        //b.setApplicationId(this.getResources().getString(R.string.google_app_id));
+        //    <string name="default_web_client_id"          translatable="false">473052494821-hl426pj4hiti0kjrokeqf277sg3mim8s.apps.googleusercontent.com</string>
+        //    <string name="firebase_database_url"          translatable="false">https://gp4e-6a225.firebaseio.com</string>
+        //    <string name="gcm_defaultSenderId"            translatable="false">473052494821</string>
+        //    <string name="google_api_key"                 translatable="false">AIzaSyCnyVeuMNfIEPrB4GFnU3gepf6FMRctrWw</string>
+        //    <string name="google_app_id"                  translatable="false">1:473052494821:android:64ee41e68a62683f680d0c</string>
+        //    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyCnyVeuMNfIEPrB4GFnU3gepf6FMRctrWw</string>
+        //    <string name="google_storage_bucket"          translatable="false">gp4e-6a225.appspot.com</string>
+        //    <string name="project_id"                     translatable="false">gp4e-6a225</string>
+        b.setStorageBucket("p4e-6a225.appspot.com");
+        b.setGcmSenderId("gp4e-6a225");
+        FirebaseApp.initializeApp(this,b.build());
+        */
 
     }
+
+
 
     private void clearPlayersBox() {
         Button b1 = findViewById(R.id.fastgameplayer1);
@@ -301,7 +352,10 @@ public class Home extends AppCompatActivity {
             pl.color = icolor.c;
             pl.name = n;
             if (!Player.exists(this.getExternalFilesDir("players"), n)) {
-                pl.save(this.getExternalFilesDir("players"), n);
+                boolean isdone = pl.save(this.getExternalFilesDir("players"), n);
+                if (isdone) {
+                    Savedpls.add(pl.name);
+                }
             } else {
                 AlertDialog.Builder b2 = new AlertDialog.Builder(ctx);
                 b2.setTitle("Vuoi sostituire?");
@@ -339,8 +393,7 @@ public class Home extends AppCompatActivity {
         LinearLayout ll = new LinearLayout(ctx);
         ll.setOrientation(LinearLayout.VERTICAL);
         Spinner sdpl = new Spinner(ctx);
-        List<String> pls = Arrays.stream(Objects.requireNonNull(new File(this.getExternalFilesDir("players").toURI()).listFiles())).map(x -> (Arrays.toString(x.getName().split(".json"))).replaceAll("[^a-zA-Z]", "")).collect(Collectors.toList());
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, pls);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, Savedpls);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sdpl.setAdapter(adapter);
         ll.addView(sdpl);
@@ -355,9 +408,17 @@ public class Home extends AppCompatActivity {
         builder.setPositiveButton("OPEN", (dialogInterface, i) ->{
            Player pl = Player.read(this.getExternalFilesDir("players"),sdpl.getSelectedItem().toString().replaceAll("[^a-zA-Z]", ""));
            System.out.println(pl.color);
+           String thatpl = btn.getText().toString();
+           List<String> pls = Arrays.stream(Objects.requireNonNull(new File(this.getExternalFilesDir("players").toURI()).listFiles())).map(x -> (Arrays.toString(x.getName().split(".json"))).replaceAll("[^a-zA-Z]", "")).collect(Collectors.toList());
+           if (pls.contains(thatpl)&&!Savedpls.contains(thatpl)) {
+               Savedpls.add(thatpl);
+           }
            btn.setBackgroundColor(pl.color);
            btn.setText(pl.name);
            g.setPlayer(playeri-1,pl);
+           if (Savedpls.contains(pl.name)) {
+               Savedpls.remove(pl.name);
+           }
         });
         AlertDialog dialog = builder.create();
         dialog.show();
@@ -410,7 +471,7 @@ public class Home extends AppCompatActivity {
         Intent i = new Intent(this, SingleMatch.class);
         try {
             i.putExtra("game", Parser.StringifyGame(g));
-            i.putExtra("share",share);
+            //i.putExtra("share",share);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -421,7 +482,7 @@ public class Home extends AppCompatActivity {
         Intent i = new Intent(this, DoubleMatch.class);
         try {
             i.putExtra("game", Parser.StringifyGame(g));
-            i.putExtra("share",share);
+            //i.putExtra("share",share);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -442,9 +503,10 @@ public class Home extends AppCompatActivity {
             lg.setOnClickListener(v -> {
                 Intent i = new Intent(this, UserPage.class);
                 i.putExtra("user", u);
+                setResult(REQ_LOG_OUT,i);
                 startActivity(i);
             });
-            lg.setText("Benvenuto " + u.getDisplayName());
+            lg.setText("Benvenuto " + u.getEmail().split("@")[0]);
         }
     }
 
@@ -490,6 +552,10 @@ public class Home extends AppCompatActivity {
                 } catch (ApiException e) {
                     // Google Sign In failed, update UI appropriately
                 }
+            case REQ_LOG_OUT:
+                Button lg = findViewById(R.id.login);
+                lg.setText("Login");
+                setupLogin();
         }
     }
     private void firebaseAuthWithGoogle(String idToken) {

@@ -344,4 +344,11 @@ class Parser {
         res.put("data",ja);
         return res.toString();
     }
+
+    public static String IdToLink(String web_id) {
+        String res = "https://domipoke.github.io/PingPongScoreboard?matchid=" + web_id;
+        Utils.Log(web_id);
+        Utils.Log(res);
+        return res;
+    }
 }
