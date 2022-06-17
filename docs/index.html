@@ -39,6 +39,7 @@
         var id=getUrlVars()["matchid"];
         db.collection("matches").doc(id).onSnapshot((doc) => {
             var data = doc.data()
+            console.log(data)
             var sets = data["sets"]
             var w1 = sets.filter(x=>x.score1>x.score2).length
             var w2 = sets.filter(x=>x.score2>x.score1).length
