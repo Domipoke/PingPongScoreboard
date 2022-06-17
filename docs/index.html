@@ -61,10 +61,10 @@
                 colorToHex(data["players"]["player1"]["color"]),
                 colorToHex(data["players"]["player2"]["color"])
             ]
-            document.getElementById("name1").innerHTML=team1
+            document.getElementById("name1").innerHTML=team1.toUpperCase()
             document.getElementById("name1").style.backgroundColor = color[0]
-            document.getElementById("name2").innerHTML=team2
-            document.getElementById("name2").style.backgroundColor = color[0]
+            document.getElementById("name2").innerHTML=team2.toUpperCase()
+            document.getElementById("name2").style.backgroundColor = color[1]
 
             document.getElementById("set1").innerHTML=w1
             document.getElementById("set2").innerHTML=w2
