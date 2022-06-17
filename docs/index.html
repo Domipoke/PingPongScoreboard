@@ -69,8 +69,8 @@
                 team2 = pl2["name"]
             }
             var color = [
-                colorToHex(data["players"]["player1"]["color"]),
-                colorToHex(data["players"]["player2"]["color"])
+                colorToHex(selpl(pl,0)["color"]),
+                colorToHex(selpl(pl,1)["color"])
             ]
             document.getElementById("name1").innerHTML=team1.toUpperCase()
             document.getElementById("name1").style.backgroundColor = color[0]
