@@ -36,6 +36,10 @@
             }
             return vars;
         }
+        function selpl(player, i) {
+            if (player["player"+(i+1)]!=null) {return player["player"+(i+1)]}
+            else {return player[i]}
+        }
         function colorToHex(c) {
             return '#'+ ('000000' + (c & 0xFFFFFF).toString(16)).slice(-6);
         }
@@ -47,15 +51,22 @@
             var sets = data["sets"]
             var w1 = sets.filter(x=>x.score1>x.score2).length
             var w2 = sets.filter(x=>x.score2>x.score1).length
-            var pls = data["players"].length
+            var pl = data["players"]
+            var pls = pl.length
             var team1="";
             var team2="";
             if (pls==4) {
-                team1 = data["players"]["player1"]["name"]+" "+data["players"]["player3"]["name"]
-                team2 = data["players"]["player2"]["name"]+" "+data["players"]["player4"]["name"]
+                var pl1 = selpl(pl,0)
+                var pl2 = selpl(pl,1)
+                var pl3 = selpl(pl,2)
+                var pl4 = selpl(pl,3)
+                team1 = pl1["name"]+" "+pl3["name"]
+                team2 = pl2["name"]+" "+pl4["name"]
             } else {
-                team1 = data["players"]["player1"]["name"]
-                team2 = data["players"]["player2"]["name"]
+                var pl1 = selpl(pl,0)
+                var pl2 = selpl(pl,1)
+                team1 = pl1["name"]
+                team2 = pl2["name"]
             }
             var color = [
                 colorToHex(data["players"]["player1"]["color"]),
