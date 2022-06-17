@@ -36,6 +36,9 @@
             }
             return vars;
         }
+        function colorToHex(c) {
+            return '#'+ ('000000' + (c & 0xFFFFFF).toString(16)).slice(-6);
+        }
         const db = firebase.firestore();
         var id=getUrlVars()["matchid"];
         db.collection("matches").doc(id).onSnapshot((doc) => {
@@ -47,21 +50,29 @@
             var pls = data["players"].length
             var team1="";
             var team2="";
-            if (pls==2) {
-                team1 = data["players"]["player1"]["name"]
-                team2 = data["players"]["player2"]["name"]
-            } else if (pls==4) {
+            if (pls==4) {
                 team1 = data["players"]["player1"]["name"]+" "+data["players"]["player3"]["name"]
                 team2 = data["players"]["player2"]["name"]+" "+data["players"]["player4"]["name"]
+            } else {
+                team1 = data["players"]["player1"]["name"]
+                team2 = data["players"]["player2"]["name"]
             }
+            var color = [
+                colorToHex(data["players"]["player1"]["color"]),
+                colorToHex(data["players"]["player2"]["color"])
+            ]
             document.getElementById("name1").innerHTML=team1
+            document.getElementById("name1").style.backgroundColor = color[0]
             document.getElementById("name2").innerHTML=team2
+            document.getElementById("name2").style.backgroundColor = color[0]
 
             document.getElementById("set1").innerHTML=w1
             document.getElementById("set2").innerHTML=w2
 
             document.getElementById("score1").innerHTML=data["score1"]
             document.getElementById("score2").innerHTML=data["score2"]
+            
+            
         });
     </script>
 </body>
