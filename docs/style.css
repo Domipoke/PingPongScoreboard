@@ -1,0 +1,16 @@
+#match {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    width: 300px;
+    font-family: 'Quicksand',sans-serif;
+    font-size: xxx-large;
+}
+#match #name1, #match #name2, #match #score2, #match #score2, #match #set1, #match #set2 {
+    padding: 10px;
+    text-align: center;
+}
+#match #name1, #match #name2 {
+    font-weight: bold;
+    border-bottom: 1px solid #ddd;
+}
+
