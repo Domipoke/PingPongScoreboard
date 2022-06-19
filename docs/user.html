@@ -1,32 +1,125 @@
 <html>
     <head><link type="text/css" rel="stylesheet" href="./style.css"></head>
-<body>
-   <table>
-        <tbody>
-            <tr>
-               <td><a href="/?matchid=id">id</a></td>
-               <td><span>team1</span></td>
-               <td><span>team2</span></td>
-            </tr>
-        </tbody>
-    </table>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script>
-        var config = {
-          apiKey: "AIzaSyCnyVeuMNfIEPrB4GFnU3gepf6FMRctrWw",
-          //authDomain: "PROJECT_ID.firebaseapp.com",
-          // The value of `databaseURL` depends on the location of the database
-          databaseURL: "https://gp4e-6a225.firebaseio.com",
-          projectId: "gp4e-6a225",
-          storageBucket: "gp4e-6a225.appspot.com",
-          //messagingSenderId: "SENDER_ID",
-          //appId: "APP_ID",
-          // For Firebase JavaScript SDK v7.20.0 and later, `measurementId` is an optional field
-          //measurementId: "G-MEASUREMENT_ID",
-        }
-        firebase.initializeApp(config);
-        
-    </script>
-</body>
+    <body>
+    <table>
+            <tbody id="t">
+                <tr>
+                <td><a href="/?matchid=id">id</a></td>
+                <td><span>team1</span></td>
+                <td><span>team2</span></td>
+                </tr>
+            </tbody>
+        </table>
+        <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+        <script>
+            function getUrlVars()  {
+                var vars = [], hash;
+                var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+                for (var i = 0; i < hashes.length; i++)
+                {
+                    hash = hashes[i].split('=');
+                    vars.push(hash[0]);
+                    vars[hash[0]] = hash[1];
+                }
+                return vars;
+            }
+            function selpl(player, i) {
+                if (player["player"+(i+1)]!=null) {return player["player"+(i+1)]}
+                else {return player[i]}
+            }
+            function colorToHex(c) {
+                return '#'+ ('000000' + (c & 0xFFFFFF).toString(16)).slice(-6);
+            }
+            function notEmpty(st) {
+                if (st != null && st != "") return true
+                else return false
+            }
+            function setup(list) {
+                if (list.length>0) {
+                    for (let i = 0; i < list.length; i++) {
+                        var e = list[i];
+                        var tr   = document.createElement("tr")
+                        var tda  = document.createElement("td")
+                        var a = document.createElement("a")
+                        a.href = "https://domipoke.github.io/PingPongScoreboard?matchid="+e
+                        tda.append(a)
+                        var tdt1 = document.createElement("td")
+                        tdt1.id="tdt1"+e
+                        var tdt2 = document.createElement("td")
+                        tdt2.id="tdt2"+e
+                        tr.appendChild(tda)
+                        tr.appendChild(tdt1)
+                        tr.appendChild(tdt2)
+                        document.getElementById("t").appendChild(tr)              
+                        db.collection("matches").doc(e).get().then(doc=>{
+                            if (doc.exists()) {
+                                var data = doc.data()
+                                var pl = data["players"]
+                                var team1="";
+                                var team2="";
+                                if (pls==4) {
+                                    var pl1 = selpl(pl,0)
+                                    var pl2 = selpl(pl,1)
+                                    var pl3 = selpl(pl,2)
+                                    var pl4 = selpl(pl,3)
+                                    team1 = pl1["name"]+" "+pl3["name"]
+                                    team2 = pl2["name"]+" "+pl4["name"]
+                                } else {
+                                    var pl1 = selpl(pl,0)
+                                    var pl2 = selpl(pl,1)
+                                    team1 = pl1["name"]
+                                    team2 = pl2["name"]
+                                }
+                                var color = [
+                                    colorToHex(selpl(pl,0)["color"]),
+                                    colorToHex(selpl(pl,1)["color"])
+                                ]
+                                document.getElementById("tdt1"+e).innerHTML=team1
+                                document.getElementById("tdt1"+e).style.backgroundColor=color[0]
+                                document.getElementById("tdt2"+e).innerHTML=team2
+                                document.getElementById("tdt2"+e).style.backgroundColor=color[1]
+                            }
+                        })
+                    }
+                }
+            }
+            //
+            var config = {
+            apiKey: "AIzaSyCnyVeuMNfIEPrB4GFnU3gepf6FMRctrWw",
+            //authDomain: "PROJECT_ID.firebaseapp.com",
+            // The value of `databaseURL` depends on the location of the database
+            databaseURL: "https://gp4e-6a225.firebaseio.com",
+            projectId: "gp4e-6a225",
+            storageBucket: "gp4e-6a225.appspot.com",
+            //messagingSenderId: "SENDER_ID",
+            //appId: "APP_ID",
+            // For Firebase JavaScript SDK v7.20.0 and later, `measurementId` is an optional field
+            //measurementId: "G-MEASUREMENT_ID",
+            }
+            firebase.initializeApp(config);
+            const db = firebase.firestore();
+            var uid = getUrlVars()["uid"];
+            var email = getUrlVars()["email"];
+            if (notEmpty(uid)) {
+                db.collection("players").doc(uid).onSnapshot((doc) => {
+                    var data = doc.data();
+                    setup(
+                        data.get("playedmatches")
+                    )
+                });
+            } else if (notEmpty(email)) {
+                db.collection("players").where("email", "==", email).get().then((querySnapshot) => {
+                    if (querySnapshot.length>=1) {
+                        querySnapshot[0].onSnapshot((doc) => {
+                            var data = doc.data();
+                            setup(
+                                data.get("playedmatches")
+                            )
+                        });
+                    }
+                })
+            }
+        </script>
+    </body>
 </html>
