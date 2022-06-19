@@ -102,7 +102,7 @@
             var uid = getUrlVars()["uid"];
             var email = getUrlVars()["email"];
             if (notEmpty(uid)) {
-                db.collection("players").doc(uid).onSnapshot((doc) => {
+                db.collection("players").doc(uid).get().then((doc) => {
                     var data = doc.data();
                     setup(
                         data.get("playedmatches")
@@ -110,14 +110,12 @@
                 });
             } else if (notEmpty(email)) {
                 db.collection("players").where("email", "==", email).get().then((querySnapshot) => {
-                    if (querySnapshot.length>=1) {
-                        querySnapshot[0].onSnapshot((doc) => {
-                            var data = doc.data();
-                            setup(
-                                data.get("playedmatches")
-                            )
-                        });
-                    }
+                    var doc; 
+                    querySnapshot.forEach(x=>doc=x);
+                    var data = doc.data();
+                    setup(
+                        data.get("playedmatches")
+                    )
                 })
             }
         </script>
