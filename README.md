@@ -1,7 +1,7 @@
 # PingPongScoreboard
 
 ## Pages
-- [Match](https://domipoke.github.io/PingPongScoreboard/)
+- [Match](https://domipoke.github.io/PingPongScoreboard/match.html)
 - [User](https://domipoke.github.io/PingPongScoreboard/user.html)
 
 ## Download Beta 
