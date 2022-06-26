@@ -2,9 +2,16 @@ package it.domipoke.pingpongscoreboard;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -21,10 +28,12 @@ public class UserPage extends AppCompatActivity {
     public TextView PlayerName;
     public TextView PlayerColor;
 
+    public Context ctx;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_page);
+        ctx = this;
         Bundle b = getIntent().getExtras();
         Object ob = b.get("user");
         FirebaseUser u = (FirebaseUser) ob;
@@ -56,5 +65,28 @@ public class UserPage extends AppCompatActivity {
             PlayerName.setText(p.name);
             PlayerColor.setBackgroundColor(p.color);
         }
+
+        findViewById(R.id.editUser).setOnClickListener(v->{
+            db.findUserFromUid(FirebaseAuth.getInstance().getCurrentUser().getUid(), new SimpleCallback.UserFinded() {
+                @Override
+                public void callback(User u) {
+                    AlertDialog.Builder bb = new AlertDialog.Builder(ctx);
+                    Context c = bb.getContext();
+                    LinearLayout Vll = new LinearLayout(c);
+
+                    //PlName EditText
+                    LinearLayout Nickname = Layout.newField(c,"Nickname",);
+                    Vll.addView();
+                    bb.setView(Vll);
+                    bb.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                        }
+                    })
+                    bb.create().show();
+                }
+            });
+        });
     }
 }

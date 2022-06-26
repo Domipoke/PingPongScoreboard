@@ -12,11 +12,26 @@
     <TextView
         android:id="@+id/updatessingle"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:textAlignment="center"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toStartOf="@id/sharematch"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+
+    <Button
+        android:id="@+id/sharematch"
+        style="@style/TextAppearance.AppCompat.Widget.Button.Colored"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@android:drawable/ic_menu_share"
+        android:contentDescription="@string/condividi"
+        app:layout_constraintBottom_toBottomOf="@+id/updatessingle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/updatessingle"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/pl1"
@@ -108,6 +123,7 @@
             android:textSize="34sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
         <TextView
             android:id="@+id/Tscore2"
             android:layout_width="match_parent"
@@ -149,4 +165,5 @@
             app:layout_constraintTop_toBottomOf="@id/baddpl2" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

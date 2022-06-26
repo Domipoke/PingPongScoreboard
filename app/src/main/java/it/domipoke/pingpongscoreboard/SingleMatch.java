@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -12,9 +13,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 import org.json.JSONException;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class SingleMatch extends AppCompatActivity {
@@ -34,22 +40,32 @@ public class SingleMatch extends AppCompatActivity {
     private Object VoiceRecognition;
     public boolean share;
     public String wid;
-
+    public Last l;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_single_match);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         Bundle b = getIntent().getExtras();
         share = (boolean) b.get("share");
-
         String s = b.get("game").toString();
-        if (share) {
-            wid = (String) b.get("web_id");
-        }
         Utils.Log("Single Match -> s :"+s);
         List<Game> gs = Parser.parseString(s);
         g = gs.get(0);
+        l = new Last(this);
+        if (share) {
+            wid = (String) b.get("web_id");
+            g.web_id = wid;
+            new FireDataBase().pushMatch(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()),wid);
+        }
+        try {
+            l.updateLastGame(g);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         try {
             Utils.Log("Single Match -> p :"+Parser.StringifyPlayer(g.players));
         } catch (JSONException e) {
@@ -72,6 +88,37 @@ public class SingleMatch extends AppCompatActivity {
         baddpl2 = findViewById(R.id.baddpl2);
         brempl1 = findViewById(R.id.brempl1);
         brempl2 = findViewById(R.id.brempl2);
+        findViewById(R.id.sharematch).setOnClickListener(x->{
+            if (share) {
+                String url = Parser.IdToLink(wid);
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, url);
+                sendIntent.setType("text/plain");
+                Intent shareIntent = Intent.createChooser(sendIntent, wid);
+                this.startActivity(shareIntent);
+            } else {
+                boolean bl = FirebaseAuth.getInstance().getCurrentUser().isEmailVerified();
+                Utils.Log(String.valueOf(bl));
+                if (bl) {
+                    try {
+                        Utils.Log(Parser.StringifyGame(g));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Map<String, Object> mso = new FireDataBase().ShareMatch(this.g, this, -1);
+                    share = true;
+                    g.web_id = mso.get("web_id").toString();
+                    try {
+                        l.updateLastGame(this.g);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
         /*
         Thread t = new Thread(new VoiceRecognition(this));
         t.setName("voicecontrol");
@@ -81,6 +128,11 @@ public class SingleMatch extends AppCompatActivity {
 
     private void startSet() {
         setSide();
+        try {
+            System.out.println("Sets: " + Parser.StringifySet(g.sets));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         g.set=g.sets.size();
         updateScoreText();
         pl1.setBackgroundColor(g.players.get(0).color);
@@ -95,7 +147,9 @@ public class SingleMatch extends AppCompatActivity {
     private void updateScoreText() {
         Tscore1.setText(String.valueOf(g.score1));
         Tscore2.setText(String.valueOf(g.score2));
-        ((TextView) findViewById(R.id.updatessingle)).setText((String) PingPongRuleChecker.WhoServesSingle(g, PingPongRuleChecker.RETURN_TYPE_STRING));
+        String upd = (String) PingPongRuleChecker.WhoServesSingle(g, PingPongRuleChecker.RETURN_TYPE_STRING);
+        ((TextView) findViewById(R.id.updatessingle)).setText(upd);
+        g.updates=upd;
         ((TextView) findViewById(R.id.setwonby1)).setText(String.valueOf(g.sets.stream().filter(x->x.score1>x.score2).count()));
         ((TextView) findViewById(R.id.setwonby2)).setText(String.valueOf(g.sets.stream().filter(x->x.score2>x.score1).count()));
 
@@ -117,7 +171,18 @@ public class SingleMatch extends AppCompatActivity {
         if (share) {
             FireDataBase db = new FireDataBase();
             db.updateGame(wid, g);
+            g.save(this.getExternalFilesDir("games"), wid);
+        } else {
+            g.save(this.getExternalFilesDir("games"), g.generateNewName(this));
         }
+        try {
+            l.updateLastGame(g);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        g.updateCurrentSet();
     }
 
     public void setSide() {

@@ -2,12 +2,18 @@ package it.domipoke.pingpongscoreboard;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import org.json.JSONException;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -31,16 +37,49 @@ class FireDataBase {
                }
             }
          });
-         return res.get().toObject(Player.class);
+         return (Player) Parser.parseString(res.get().get("player").toString());
       } catch (Exception e) {
          return null;
       }
    }
+   public QueryDocumentSnapshot findPlayerQDS(String uid) {
+      AtomicReference<QueryDocumentSnapshot> res = new AtomicReference<QueryDocumentSnapshot>();
+      try {
+         db.collection("players").get().addOnCompleteListener(x -> {
+            if (x.isSuccessful()) {
+               for (QueryDocumentSnapshot doc : x.getResult()) {
+                  if (doc.get("uid") == uid) {
+                     res.set(doc);
+                  }
+               }
+            }
+         });
+         return res.get();
+      } catch (Exception e) {
+         return null;
+      }
+   }
+   public boolean findPlayerBool(String uid) {
+      AtomicReference<QueryDocumentSnapshot> res = new AtomicReference<QueryDocumentSnapshot>();
+      try {
+         db.collection("players").get().addOnCompleteListener(x -> {
+            if (x.isSuccessful()) {
+               for (QueryDocumentSnapshot doc : x.getResult()) {
+                  if (doc.get("uid") == uid) {
+                     res.set(doc);
+                  }
+               }
+            }
+         });
+         return true;
+      } catch (Exception e) {
+         return false;
+      }
+   }
 
 
-
-   public void ShareMatch(Game match, Context ctx,int gameType) {
-      Runnable r;
+   public Map<String,Object> ShareMatch(Game match, Context ctx, int gameType) {
+      AtomicReference<Map<String,Object>> res = new AtomicReference(new HashMap<>());
       boolean exists = false;
       if (match.web_id!=null) {
          if (findMatchBool(match.web_id)) {
@@ -50,37 +89,36 @@ class FireDataBase {
       Utils.Log("Exists: " + exists);
       if (!exists) {
          //r = () ->
-         db.collection("match").add(match.toMap()).addOnCompleteListener(x->{
+         db.collection("matches").add(match.toMap()).addOnCompleteListener(x->{
             if (x.isSuccessful()) {
                String[] path = x.getResult().getPath().split("/");
-               String id = path[path.length-1];
-               Utils.Log("ID: "+id);
+               String id = path[path.length - 1];
+               Utils.Log("ID: " + id);
                Utils.Log(path.toString());
                Game game2 = match;
                game2.web_id = id;
                x.getResult().set(game2);
                String url = Parser.IdToLink(game2.web_id);
 
-               if (gameType==0) {
-                  Intent i = new Intent(ctx,SingleMatch.class);
+               if (gameType == 0) {
+                  Intent i = new Intent(ctx, SingleMatch.class);
                   try {
                      i.putExtra("game", Parser.StringifyGame(game2));
                   } catch (JSONException e) {
                      e.printStackTrace();
                   }
-                  i.putExtra("share",true);
-                  i.putExtra("web_id",id);
+                  i.putExtra("share", true);
+                  i.putExtra("web_id", id);
                   ctx.startActivity(i);
-               }
-               else {
-                  Intent i = new Intent(ctx,DoubleMatch.class);
+               } else if (gameType != -1) {
+                  Intent i = new Intent(ctx, DoubleMatch.class);
                   try {
                      i.putExtra("game", Parser.StringifyGame(game2));
                   } catch (JSONException e) {
                      e.printStackTrace();
                   }
-                  i.putExtra("share",true);
-                  i.putExtra("webID",id);
+                  i.putExtra("share", true);
+                  i.putExtra("web_id", id);
                   ctx.startActivity(i);
                }
 
@@ -92,7 +130,9 @@ class FireDataBase {
                ctx.startActivity(shareIntent);
 
 
-
+               Map<String, Object> st = res.get();
+               st.put("webid",id);
+               res.set(st);
             } else {
                x.getException().printStackTrace();
             }
@@ -105,12 +145,12 @@ class FireDataBase {
          findMatch(match.web_id);
       }
       //Thread t = new Thread(r);
-
+      return res.get();
    }
 
    private boolean findMatchBool(String id) {
       AtomicBoolean res = new AtomicBoolean(false);
-      db.collection("match").whereEqualTo("web_id", id).get().addOnCompleteListener(x->{
+      db.collection("matches").whereEqualTo("web_id", id).get().addOnCompleteListener(x->{
          if (x.isSuccessful()) {
             if (x.getResult().size()>=1) {
                res.set(true);
@@ -122,7 +162,7 @@ class FireDataBase {
 
    public Game findMatch(String id) {
       AtomicReference<Game> res = new AtomicReference<Game>();
-      db.collection("match").whereEqualTo("web_id", id).get().addOnCompleteListener(x->{
+      db.collection("matches").whereEqualTo("web_id", id).get().addOnCompleteListener(x->{
          if (x.isSuccessful()) {
             if (x.getResult().size()>=1) {
                QueryDocumentSnapshot doc = x.getResult().iterator().next();
@@ -134,12 +174,80 @@ class FireDataBase {
    }
 
    public void updateGame(String wid, Game g) {
-      db.collection("match").document(String.valueOf(wid)).set(g.toMap()).addOnCompleteListener(task -> {
-         if (task.isSuccessful()) {
-            Utils.Log("Firestore Updates");
-         } else {
-            task.getException().printStackTrace();
+      //if (Utils.isNetworkAvailable(ctx)) {
+         /*AtomicReference<Long> sets = new AtomicReference<Long>(0L);
+         db.collection("matches").document(String.valueOf(wid)).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+               ArrayList a = (ArrayList) task.getResult().get("sets");
+               long l = a.stream().count();
+               sets.set(l);
+            }
+         });
+            if ((long) g.sets.size() >= sets.get()) {*/
+         db.collection("matches").document(String.valueOf(wid)).set(g.toMap()).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+               Utils.Log("Firestore Updates");
+            } else {
+               task.getException().printStackTrace();
+            }
+         });
+         //}
+      //}
+   }
+
+   public void setupUser(FirebaseUser u) {
+      String uid = u.getEmail();
+      boolean exists = false;
+      if (!uid.equals("")) {
+         if (findPlayerBool(uid)) {
+            exists = true;
+         }
+      }
+      if (!exists) {
+         db.collection("players").document(u.getEmail()).set(User.clearMap(u)).addOnCompleteListener(x->{
+
+         });
+      }
+   }
+
+   public void pushMatch(FirebaseUser currentUser, String id) {
+      db.collection("players").document(currentUser.getUid()).get().addOnCompleteListener(pl-> {
+         if (pl.isSuccessful()) {
+            if (!pl.getResult().exists()) {
+               Map<String, Object> m = User.clearMap(currentUser);
+               ArrayList a = (ArrayList) m.get("playedmatches");
+               a.add(id);
+               m.put("playedmatches",a);
+               db.collection("players").document(currentUser.getUid()).set(m);
+            } else {
+               Map<String, Object> m = pl.getResult().getData();
+               ArrayList a = (ArrayList) m.get("playedmatches");
+               a.add(id);
+               m.put("playedmatches",a);
+               db.collection("players").document(currentUser.getUid()).set(m);
+            }
          }
       });
+   }
+
+    public DocumentSnapshot findUserFromNickName(String nickname) {
+      AtomicReference<DocumentSnapshot> d  = new AtomicReference<>();
+      db.collection("players").whereEqualTo("nicknane",nickname).get().addOnCompleteListener(task->{
+         if (task.isSuccessful()) {
+            AtomicReference<Map<String,Object>> found = null;
+            task.getResult().getDocuments().forEach(doc->{
+               d.set(doc);
+            });
+         }
+      });
+      return d.get();
+    }
+
+   public void getPlayer(DocumentSnapshot userFromNickName, int pi, SimpleCallback.PlayerCallBack callback) {
+      Player p = (Player) Parser.parseString(userFromNickName.get("player").toString()).get(0);
+      callback.callback(p,pi);
+   }
+
+   public void findUserFromUid(String uid, SimpleCallback.UserFinded callback) {
    }
 }

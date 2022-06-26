@@ -1,19 +1,25 @@
 package it.domipoke.pingpongscoreboard;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputType;
-import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.view.View;
+import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,6 +28,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.auth.api.identity.BeginSignInRequest;
@@ -34,23 +42,27 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.security.cert.CertPathBuilder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -79,36 +91,39 @@ public class Home extends AppCompatActivity {
 
     public List<String> Savedpls;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        System.out.println();
         setupFirebase();
         g = new Game();
         System.out.println("Started: " + this.getExternalFilesDir(null).toString());
         //Manifest.permission.RECORD_AUDIO
-        for (String p : new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, }) {
+        for (String p : Dictionary.ManifestPermissions) {
             if (ActivityCompat.checkSelfPermission(this, p) == PackageManager.PERMISSION_DENIED) {
                 ActivityCompat.requestPermissions(Home.this, new String[]{p}, PERMISSION_REQUEST_CODE);
             }
         }
         SetupPortrait();
         checkFiles();
-        findViewById(R.id.startmatch).setOnClickListener(view ->{
+        checkIntent();
+        findViewById(R.id.startmatch).setOnClickListener(view -> {
             int pls = g.howmanyPlayers();
             try {
                 Utils.Log(Parser.StringifyGame(g));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            if (pls==2 | pls==4) {
-                g.players=g.getPlayers();
-                if (pls==2) StartSingleMatch(false);
+            if (pls == 2 | pls == 4) {
+                g.players = g.getPlayers();
+                if (pls == 2) StartSingleMatch(false);
                 else StartDoubleMatch(false);
                 clearPlayersBox();
                 Savedpls = Arrays.stream(Objects.requireNonNull(new File(ctx.getExternalFilesDir("players").toURI()).listFiles())).map(x -> (Arrays.toString(x.getName().split(".json"))).replaceAll("[^a-zA-Z]", "")).collect(Collectors.toList());
-            }else {
+            } else {
                 if (pls <= 0) {
                     Utils.FastToast(this, "Non ci sono gicoatori in questa partita", Toast.LENGTH_SHORT);
                 } else if (pls == 3 | pls == 1) {
@@ -134,8 +149,8 @@ public class Home extends AppCompatActivity {
                         if (pls == 2 | pls == 4) {
                             g.players = g.getPlayers();
                             FireDataBase fdb = new FireDataBase();
-                            if (pls == 2) fdb.ShareMatch(g,ctx,0);
-                            else fdb.ShareMatch(g,ctx,1);
+                            if (pls == 2) fdb.ShareMatch(g, ctx, 0);
+                            else fdb.ShareMatch(g, ctx, 1);
                             clearPlayersBox();
                             Savedpls = Arrays.stream(Objects.requireNonNull(new File(ctx.getExternalFilesDir("players").toURI()).listFiles())).map(x -> (Arrays.toString(x.getName().split(".json"))).replaceAll("[^a-zA-Z]", "")).collect(Collectors.toList());
                         } else {
@@ -166,6 +181,121 @@ public class Home extends AppCompatActivity {
             return false;
         });
 
+        findViewById(R.id.continua).setOnClickListener(view -> {
+            Last l = new Last(this);
+            try {
+                Game ng = l.readLastGame();
+                try {
+                    Utils.Log(Parser.StringifyGame(ng));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                int pls = ng.howmanyPlayers();
+                if (pls == 2 | pls == 4) {
+                    //ng.players=ng.getPlayers();
+                    System.out.println("Data");
+
+                    System.out.println(ng.web_id);
+                    boolean bl = (ng.web_id != null);
+                    System.out.println(bl);
+                    if (pls == 2) ContinueSingleMatch(ng, bl);
+                    else ContinueDoubleMatch(ng, bl);
+                    clearPlayersBox();
+                    Savedpls = Arrays.stream(Objects.requireNonNull(new File(ctx.getExternalFilesDir("players").toURI()).listFiles())).map(x -> (Arrays.toString(x.getName().split(".json"))).replaceAll("[^a-zA-Z]", "")).collect(Collectors.toList());
+                } else {
+                    if (pls <= 0) {
+                        Utils.FastToast(this, "Non ci sono gicoatori in questa partita", Toast.LENGTH_SHORT);
+                    } else if (pls == 3 | pls == 1) {
+                        Utils.FastToast(this, "Il numero di giocatori è dispari", Toast.LENGTH_SHORT);
+                    } else {
+                        Utils.FastToast(this, "Ci sono troppi giocatori", Toast.LENGTH_SHORT);
+                    }
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                Utils.FastToast(this, "Ultima partita non valida", Toast.LENGTH_SHORT);
+            }
+        });
+        findViewById(R.id.continua).setOnLongClickListener(v -> {
+            AlertDialog.Builder b = new AlertDialog.Builder(this);
+            LinearLayout ll = new LinearLayout(this);
+            Spinner spinner = Layout.FastSpinner(this, Arrays.stream(Objects.requireNonNull(new File(this.getExternalFilesDir("games").toURI()).listFiles())).map(x -> (Arrays.toString(x.getName().split(".json"))).replaceAll("[^a-zA-Z]", "")).collect(Collectors.toList()));
+            EditText e = new EditText(this);
+            e.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    String text = editable.toString();
+                    ArrayList<Map<String, List<String>>> am = Parser.GameFileTobeFilteredString(ctx);
+                    List<String> nl = new ArrayList<String>();
+                    am.forEach(x->{
+                        List<String> players = x.get("players");
+                        players.forEach(p->{
+                            if (p.contains(text)) {
+                                nl.add(x.get("filename").get(0).replaceAll(".json",""));
+                            }
+                        });
+                    });
+                    if (nl.size()>0) {Layout.UpdateSpinner(ctx,spinner,nl);}
+                    else Layout.UpdateSpinner(ctx,spinner,Arrays.stream(Objects.requireNonNull(new File(ctx.getExternalFilesDir("games").toURI()).listFiles())).map(x -> (Arrays.toString(x.getName().split(".json"))).replaceAll("[^a-zA-Z]", "")).collect(Collectors.toList()));
+                }
+            });
+            ll.addView(spinner);
+            ll.addView(e);
+            b.setView(ll);
+
+            b.setPositiveButton("Ok", (vv,err)-> {
+               String fn = e.getText().toString()+".json";
+                try {
+                    Game ng = (Game) Parser.parseString(Parser.read(new File(ctx.getExternalFilesDir("games")+"/"+File.separator+fn))).get(0);
+                    try {
+                        Utils.Log(Parser.StringifyGame(ng));
+                    } catch (JSONException error) {
+                        error.printStackTrace();
+                    }
+                    int pls = ng.howmanyPlayers();
+                    if (pls == 2 | pls == 4) {
+                        //ng.players=ng.getPlayers();
+                        System.out.println("Data");
+
+                        System.out.println(ng.web_id);
+                        boolean bl = (ng.web_id != null);
+                        System.out.println(bl);
+                        if (pls == 2) ContinueSingleMatch(ng, bl);
+                        else ContinueDoubleMatch(ng, bl);
+                        clearPlayersBox();
+                        Savedpls = Arrays.stream(Objects.requireNonNull(new File(ctx.getExternalFilesDir("players").toURI()).listFiles())).map(x -> (Arrays.toString(x.getName().split(".json"))).replaceAll("[^a-zA-Z]", "")).collect(Collectors.toList());
+                    } else {
+                        if (pls <= 0) {
+                            Utils.FastToast(this, "Non ci sono gicoatori in questa partita", Toast.LENGTH_SHORT);
+                        } else if (pls == 3 | pls == 1) {
+                            Utils.FastToast(this, "Il numero di giocatori è dispari", Toast.LENGTH_SHORT);
+                        } else {
+                            Utils.FastToast(this, "Ci sono troppi giocatori", Toast.LENGTH_SHORT);
+                        }
+                    }
+                } catch (FileNotFoundException er) {
+                    er.printStackTrace();
+                    Utils.FastToast(this, "Ultima partita non valida", Toast.LENGTH_SHORT);
+                }
+            });
+
+            b.create().show();
+            return true;
+        });
+        findViewById(R.id.startOnline).setOnClickListener(v->{
+            Intent i = new Intent(this, Online.class);
+            startActivity(i);
+        });
         /*
         findViewById(R.id.Settings).setOnClickListener(view -> {
 
@@ -183,6 +313,11 @@ public class Home extends AppCompatActivity {
         Savedpls = Arrays.stream(Objects.requireNonNull(new File(this.getExternalFilesDir("players").toURI()).listFiles())).map(x -> (Arrays.toString(x.getName().split(".json"))).replaceAll("[^a-zA-Z]", "")).collect(Collectors.toList());
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Utils.SendLogcatMail(this);
+    }
     private void setupFirebase() {
         /*
         FirebaseOptions.Builder b = new FirebaseOptions.Builder();
@@ -204,7 +339,6 @@ public class Home extends AppCompatActivity {
     }
 
 
-
     private void clearPlayersBox() {
         Button b1 = findViewById(R.id.fastgameplayer1);
         Button b2 = findViewById(R.id.fastgameplayer2);
@@ -220,7 +354,7 @@ public class Home extends AppCompatActivity {
         b2.setBackgroundColor(Color.WHITE);
         b3.setBackgroundColor(Color.WHITE);
         b4.setBackgroundColor(Color.WHITE);
-        g=new Game();
+        g = new Game();
     }
 
     private void setupLogin() {
@@ -232,8 +366,8 @@ public class Home extends AppCompatActivity {
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         mAuth = FirebaseAuth.getInstance();
-
-        findViewById(R.id.login).setOnClickListener(v->{
+        //(new FireDataBase()).setupUser(mAuth.getCurrentUser());
+        findViewById(R.id.login).setOnClickListener(v -> {
             Utils.Log("button click0");
             loginClickBtn();
             Utils.Log("button click1");
@@ -243,8 +377,9 @@ public class Home extends AppCompatActivity {
 
     public void loginClickBtn() {
         FirebaseUser cu = mAuth.getCurrentUser();
-        if (cu!=null) {loadUser(cu);}
-        else {
+        if (cu != null) {
+            loadUser(cu);
+        } else {
             AlertDialog.Builder b = new AlertDialog.Builder(this);
             b.setTitle("Login");
             LinearLayout ll = new LinearLayout(this);
@@ -258,10 +393,10 @@ public class Home extends AppCompatActivity {
             ll.addView(pwdlabel);
             ll.addView(pwdin);
             b.setView(ll);
-            b.setPositiveButton("Login", (a,c) ->{
+            b.setPositiveButton("Login", (a, c) -> {
                 String email = emailin.getText().toString();
                 String pwd = pwdin.getText().toString();
-                if (email.length()>0 && pwd.length()>0) {
+                if (email.length() > 0 && pwd.length() > 0) {
                     mAuth.signInWithEmailAndPassword(email, pwd).addOnCompleteListener(this, task -> {
                         if (task.isSuccessful()) {
                             loadUser(mAuth.getCurrentUser());
@@ -277,7 +412,7 @@ public class Home extends AppCompatActivity {
                         }
                     });
                 } else {
-                    Utils.FastToast(this,"Credenziali non valide",Toast.LENGTH_SHORT);
+                    Utils.FastToast(this, "Credenziali non valide", Toast.LENGTH_SHORT);
                 }
             });
             /*
@@ -328,6 +463,7 @@ public class Home extends AppCompatActivity {
         pl4.setOnClickListener(view -> Dial(pl4, 4));
         pl4.setOnLongClickListener(view -> LDial(pl4, 4));
     }
+
     public void Dial(Button btn, int playeri) {
         System.out.println("Dialog showing...");
         AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
@@ -345,7 +481,7 @@ public class Home extends AppCompatActivity {
         builder.setPositiveButton("SAVE", (dialogInterface, i) -> {
             String n = iname.getText().toString().replaceAll("[^a-zA-Z]", "");
             if (n.equalsIgnoreCase("") | n.matches("")) n = "player";
-            n=n.toLowerCase();
+            n = n.toLowerCase();
             btn.setBackgroundColor(icolor.c);
             btn.setText(n);
             Player pl = new Player();
@@ -360,25 +496,29 @@ public class Home extends AppCompatActivity {
                 AlertDialog.Builder b2 = new AlertDialog.Builder(ctx);
                 b2.setTitle("Vuoi sostituire?");
                 String finalN = n;
-                b2.setPositiveButton("SI", (dI2, i2) -> {pl.save(this.getExternalFilesDir("players"), finalN);btn.setBackgroundColor(icolor.c);btn.setText(finalN);});
-                b2.setNegativeButton("NO", (dI3,i3)-> dI3.cancel());
+                b2.setPositiveButton("SI", (dI2, i2) -> {
+                    pl.save(this.getExternalFilesDir("players"), finalN);
+                    btn.setBackgroundColor(icolor.c);
+                    btn.setText(finalN);
+                });
+                b2.setNegativeButton("NO", (dI3, i3) -> dI3.cancel());
                 b2.create().show();
             }
-            g.setPlayer(playeri-1,pl);
+            g.setPlayer(playeri - 1, pl);
         });
-        builder.setNeutralButton("OK",(dialogInterface, i) -> {
+        builder.setNeutralButton("OK", (dialogInterface, i) -> {
             String n = iname.getText().toString().replaceAll("[^a-zA-Z]", "");
             if (n.equalsIgnoreCase("") | n.matches("")) n = "player";
-            n=n.toLowerCase();
+            n = n.toLowerCase();
             btn.setBackgroundColor(icolor.c);
             Player pl = new Player();
-            pl.color=icolor.c;
+            pl.color = icolor.c;
             pl.name = n;
             btn.setText(pl.name);
-            g.setPlayer(playeri-1,pl);
+            g.setPlayer(playeri - 1, pl);
         });
         builder.setNegativeButton("CLEAR", ((dialogInterface, i) -> {
-            g.setPlayer(playeri-1,new Player());
+            g.setPlayer(playeri - 1, new Player());
             btn.setText("");
             btn.setBackgroundColor(Color.WHITE);
         }));
@@ -386,6 +526,7 @@ public class Home extends AppCompatActivity {
         dialog.show();
         System.out.println("Dialog showed");
     }
+
     public boolean LDial(Button btn, int playeri) {
         System.out.println("Dialog showing...");
         AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
@@ -393,49 +534,149 @@ public class Home extends AppCompatActivity {
         LinearLayout ll = new LinearLayout(ctx);
         ll.setOrientation(LinearLayout.VERTICAL);
         Spinner sdpl = new Spinner(ctx);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, Savedpls);
+        ArrayList<String> l = new ArrayList<String>();
+        l.add("Find User");
+        l.addAll(Savedpls);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, l);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sdpl.setAdapter(adapter);
+
+
+        LinearLayout Hll = new LinearLayout(ctx);
+        EditText e = new EditText(ctx);
+        ListView lv = new ListView(ctx);
+        e.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String t = editable.toString().replaceAll("[^a-zA-Z]", "");
+                if (t.length()>0) {
+                    ArrayList<String> possible = new ArrayList<>();
+                    FirebaseFirestore db = new FireDataBase().db;
+                    db.collection("players").get().addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot q : task.getResult()) {
+                                String nickname = (String) q.get("nickname");
+                                String email = (String) q.get("email");
+                                if (nickname != null) {
+                                    if (nickname.toLowerCase(Locale.ROOT).contains(t.toLowerCase(Locale.ROOT))) {
+                                        possible.add(nickname);
+                                    } else if (email!=null) {
+                                        if (email.toLowerCase(Locale.ROOT).contains(t.toLowerCase(Locale.ROOT))) {
+                                            possible.add(nickname);
+                                        }
+                                    }
+                                }
+                            }
+                            lv.setAdapter(new ArrayAdapter(ctx, R.layout.support_simple_spinner_dropdown_item, possible));
+                        }
+                    });
+                }
+            }
+        });
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                String item = (String) adapterView.getItemAtPosition(i);
+                e.setText(item);
+            }
+        });
+        Hll.setOrientation(LinearLayout.HORIZONTAL);
+        Hll.addView(e);
+        Hll.addView(lv);
+
+
+
         ll.addView(sdpl);
+
+        ll.addView(Hll);
         builder.setView(ll);
 
 
         builder.setNegativeButton("EXIT", (dialogInterface, i) -> dialogInterface.cancel());
         builder.setNeutralButton("NEW", (dialogInterface, i) -> {
             dialogInterface.cancel();
-            Dial(btn,playeri);
+            Dial(btn, playeri);
         });
-        builder.setPositiveButton("OPEN", (dialogInterface, i) ->{
-           Player pl = Player.read(this.getExternalFilesDir("players"),sdpl.getSelectedItem().toString().replaceAll("[^a-zA-Z]", ""));
-           System.out.println(pl.color);
-           String thatpl = btn.getText().toString();
-           List<String> pls = Arrays.stream(Objects.requireNonNull(new File(this.getExternalFilesDir("players").toURI()).listFiles())).map(x -> (Arrays.toString(x.getName().split(".json"))).replaceAll("[^a-zA-Z]", "")).collect(Collectors.toList());
-           if (pls.contains(thatpl)&&!Savedpls.contains(thatpl)) {
-               Savedpls.add(thatpl);
-           }
-           btn.setBackgroundColor(pl.color);
-           btn.setText(pl.name);
-           g.setPlayer(playeri-1,pl);
-           if (Savedpls.contains(pl.name)) {
-               Savedpls.remove(pl.name);
-           }
+        builder.setPositiveButton("OPEN", (dialogInterface, i) -> {
+            String plname = sdpl.getSelectedItem().toString().replaceAll("[^a-zA-Z]", "");
+            Player pl;
+            String lower = plname.toLowerCase(Locale.ROOT);
+            System.out.println(
+                    plname+"\n"+
+                            lower+"\n"+
+                            lower.contains("from")+"\n"+
+                            lower.contains("user")+"\n"+
+                            (lower.contains("from")&&lower.contains("user")));
+            if (plname.length() > 0) {
+                if (lower.contains("from")&&lower.contains("user")) {
+                    FireDataBase db = new FireDataBase();
+                    DocumentSnapshot ufn = db.findUserFromNickName(e.getText().toString());
+                    db.getPlayer(ufn, playeri, new SimpleCallback.PlayerCallBack(){
+                        @Override
+                        public void callback(Player p, int pi) {
+                            if (p!=null) {
+                                if (p.isValidToBePlayed(ctx)) {
+                                    String thatpl = btn.getText().toString();
+                                    List<String> pls = Arrays.stream(Objects.requireNonNull(new File(ctx.getExternalFilesDir("players").toURI()).listFiles())).map(x -> (Arrays.toString(x.getName().split(".json"))).replaceAll("[^a-zA-Z]", "")).collect(Collectors.toList());
+                                    if (pls.contains(thatpl) && !Savedpls.contains(thatpl)) {
+                                        Savedpls.add(thatpl);
+                                    }
+                                    btn.setBackgroundColor(p.color);
+                                    btn.setText(p.name);
+                                    g.setPlayer(pi - 1, p);
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    pl = Player.read(this.getExternalFilesDir("players"), plname);
+                    if (pl!=null) {
+                        if (pl.isValidToBePlayed(ctx)) {
+                            String thatpl = btn.getText().toString();
+                            List<String> pls = Arrays.stream(Objects.requireNonNull(new File(this.getExternalFilesDir("players").toURI()).listFiles())).map(x -> (Arrays.toString(x.getName().split(".json"))).replaceAll("[^a-zA-Z]", "")).collect(Collectors.toList());
+                            if (pls.contains(thatpl) && !Savedpls.contains(thatpl)) {
+                                Savedpls.add(thatpl);
+                            }
+                            btn.setBackgroundColor(pl.color);
+                            btn.setText(pl.name);
+                            g.setPlayer(playeri - 1, pl);
+                            if (Savedpls.contains(pl.name)) {
+                                Savedpls.remove(pl.name);
+                            }
+                        }
+                    }
+                }
+            } else {
+                Utils.FastToast(ctx, "Giocatore selezionato non valido", Toast.LENGTH_SHORT);
+            }
         });
         AlertDialog dialog = builder.create();
         dialog.show();
         System.out.println("Dialog showed");
         return true;
     }
+
     private void checkFiles() {
         File fd = this.getExternalFilesDir(null);
-        if (fd.isDirectory()&&!fd.exists()) {
+        if (fd.isDirectory() && !fd.exists()) {
             boolean mkdirs = fd.mkdirs();
-            System.out.println("Exist Dir: "+mkdirs);
+            System.out.println("Exist Dir: " + mkdirs);
         }
-        String[] files = {"stgps/default.json","players","games"};
+        String[] files = {"stgps/default.json", "players", "games", "last/game.json"};
         try {
-            createFolders(this.getExternalFilesDir(null),files);
-            File f = new File(this.getExternalFilesDir("stgps" ) + "/" + File.separator + "default.json");
-            System.out.println("File path: "+f.getPath());
+            createFolders(this.getExternalFilesDir(null), files);
+            File f = new File(this.getExternalFilesDir("stgps") + "/" + File.separator + "default.json");
+            System.out.println("File path: " + f.getPath());
             FileWriter fw = new FileWriter(f);
             JSONObject jo = new JSONObject();
             //
@@ -466,23 +707,53 @@ public class Home extends AppCompatActivity {
             }
         }
     }
+
     private void StartSingleMatch(boolean share) {
         //g.DefaultSetSingle();
         Intent i = new Intent(this, SingleMatch.class);
         try {
             i.putExtra("game", Parser.StringifyGame(g));
-            //i.putExtra("share",share);
+            i.putExtra("share", share);
         } catch (JSONException e) {
             e.printStackTrace();
         }
         startActivity(i);
     }
+
+    private void ContinueSingleMatch(Game g2, boolean share) {
+        //g.DefaultSetSingle();
+        Intent i = new Intent(this, SingleMatch.class);
+        try {
+            i.putExtra("game", Parser.StringifyGame(g2));
+            i.putExtra("share", share);
+            i.putExtra("web_id", g2.web_id);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        startActivity(i);
+    }
+
     private void StartDoubleMatch(boolean share) {
         //g.DefaultSetDouble();
         Intent i = new Intent(this, DoubleMatch.class);
         try {
             i.putExtra("game", Parser.StringifyGame(g));
-            //i.putExtra("share",share);
+            i.putExtra("share", share);
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        startActivity(i);
+    }
+
+    private void ContinueDoubleMatch(Game g2, boolean share) {
+        //g.DefaultSetDouble();
+        Intent i = new Intent(this, DoubleMatch.class);
+        try {
+            i.putExtra("game", Parser.StringifyGame(g2));
+            i.putExtra("share", share);
+            i.putExtra("web_id", g2.web_id);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -491,19 +762,19 @@ public class Home extends AppCompatActivity {
 
     public void loadUser(FirebaseUser u) {
         Utils.Log("loadUser");
-        if (u!=null) {
+        if (u != null) {
             User user = new User();
             user.u = u;
             user.uid = u.getUid();
-            user.p = new FireDataBase().findPlayer(u.getUid());
-            if (user.p==null) {
+            //user.p = new FireDataBase().findPlayer(u.getUid());
+            if (user.p == null) {
 
             }
             Button lg = findViewById(R.id.login);
             lg.setOnClickListener(v -> {
                 Intent i = new Intent(this, UserPage.class);
                 i.putExtra("user", u);
-                setResult(REQ_LOG_OUT,i);
+                setResult(REQ_LOG_OUT, i);
                 startActivity(i);
             });
             lg.setText("Benvenuto " + u.getEmail().split("@")[0]);
@@ -522,8 +793,8 @@ public class Home extends AppCompatActivity {
                 try {
                     SignInCredential credential = oneTapClient.getSignInCredentialFromIntent(data);
                     String idToken = credential.getGoogleIdToken();
-                    Utils.Log("idToken: "+idToken);
-                    if (idToken !=  null) {
+                    Utils.Log("idToken: " + idToken);
+                    if (idToken != null) {
                         // Got an ID token from Google. Use it to authenticate
                         // with Firebase.
                         AuthCredential firebaseCredential = GoogleAuthProvider.getCredential(idToken, null);
@@ -542,7 +813,7 @@ public class Home extends AppCompatActivity {
                     // ...
                 }
                 break;
-            case  RC_SIGN_IN:
+            case RC_SIGN_IN:
                 Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
                 try {
                     // Google Sign In was successful, authenticate with Firebase
@@ -558,6 +829,7 @@ public class Home extends AppCompatActivity {
                 setupLogin();
         }
     }
+
     private void firebaseAuthWithGoogle(String idToken) {
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         mAuth.signInWithCredential(credential)
@@ -567,7 +839,7 @@ public class Home extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             FirebaseUser user = mAuth.getCurrentUser();
-                            Utils.FastToast(ctx, user.getEmail(),1);
+                            Utils.FastToast(ctx, user.getEmail(), 1);
                             loadUser(user);
                         } else {
                             // If sign in fails, display a message to the user.
@@ -587,22 +859,40 @@ public class Home extends AppCompatActivity {
     }
 
 
-        // [START auth_with_google]
+    // [START auth_with_google]
 
-        // [END auth_with_google]
+    // [END auth_with_google]
 
-        // [START signin]
-        private void signIn() {
-            Utils.Log("Intent pick0");
-            Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-            Utils.Log("Intent pick1");
-            setResult(RC_SIGN_IN,signInIntent);
-            startActivity(signInIntent);
-        }
-        // [END signin]
-
-        private void updateUI(FirebaseUser user) {
-            loadUser(user);
-        }
+    // [START signin]
+    private void signIn() {
+        Utils.Log("Intent pick0");
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        Utils.Log("Intent pick1");
+        setResult(RC_SIGN_IN, signInIntent);
+        startActivity(signInIntent);
     }
+    // [END signin]
+
+    private void updateUI(FirebaseUser user) {
+        loadUser(user);
+    }
+
+    public void checkIntent() {
+        Intent intent = getIntent();
+        if (intent!=null) {
+            String action = intent.getAction();
+            if (action!=null&&!action.equalsIgnoreCase("")) {
+                Uri data = intent.getData();
+                if (data!=null) {
+                    String id = data.getQueryParameter("matchid");
+                    Intent i = new Intent(this, WatchMatch.class);
+                    i.putExtra("id", id);
+                    startActivity(i);
+                }
+            }
+        }
+
+    }
+
+}
 

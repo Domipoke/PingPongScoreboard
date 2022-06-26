@@ -1,5 +1,6 @@
 package it.domipoke.pingpongscoreboard;
 
+import android.content.Context;
 import android.graphics.Color;
 
 import androidx.annotation.NonNull;
@@ -12,10 +13,16 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 class Parser {
     public Parser() {}
@@ -129,6 +136,9 @@ class Parser {
             if (o.has("set")) {
                 p.set = Integer.parseInt(o.get("set").toString());
             }
+            if (o.has("sets")) {
+                p.sets = parseString(o.get("sets").toString());
+            }
             if (o.has("score1")) {
                 p.score1 = Integer.parseInt(o.get("score1").toString());
             }
@@ -137,6 +147,12 @@ class Parser {
             }
             if (o.has("players")) {
                 p.players = parseString(o.get("players").toString());
+            }
+            if (o.has("web_id")) {
+                p.web_id = o.get("web_id").toString();
+            }
+            if (o.has("updates")) {
+                p.updates = o.get("updates").toString();
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -172,10 +188,10 @@ class Parser {
                 s.score2 = (int) o.get("score2");
             }
             if (o.has("startdate")) {
-                s.startdate = (int) o.get("startdate");
+                s.startdate = Long.parseLong(o.get("startdate").toString());
             }
             if (o.has("enddate")) {
-                s.enddate = (int) o.get("enddate");
+                s.enddate = Long.parseLong(o.get("enddate").toString());
             }
 
         } catch (JSONException e) {
@@ -183,6 +199,7 @@ class Parser {
         }
         return s;
     }
+
     //
     public static String StringifyPlayer(List<Player> ps) throws JSONException {
         JSONObject res = new JSONObject();
@@ -241,6 +258,8 @@ class Parser {
                 o.put("sets", new JSONObject(StringifySet(g.sets)));
                 o.put("currentset", new JSONObject(StringifySet(g.currentset)));
                 o.put("settings", new JSONObject(StringifySetting(g.settings)));
+                o.put("web_id", g.web_id);
+                o.put("updates",g.updates);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -264,6 +283,9 @@ class Parser {
             o.put("sets", new JSONObject(StringifySet(g.sets)));
             o.put("currentset", new JSONObject(StringifySet(g.currentset)));
             o.put("settings", new JSONObject(StringifySetting(g.settings)));
+            //Utils.Log("web_id:"+g.web_id);
+            o.put("web_id", g.web_id);
+            o.put("updates",g.updates);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -311,13 +333,13 @@ class Parser {
         res.put("type", "set");
         JSONArray ja = new JSONArray();
 
-        ss.forEach(p-> {
+        ss.forEach(s-> {
             JSONObject o = new JSONObject();
             try {
-                o.put("score1",p.score1);
-                o.put("score2",p.score2);
-                o.put("startdate",p.startdate);
-                o.put("enddate", p.enddate);
+                o.put("score1",s.score1);
+                o.put("score2",s.score2);
+                o.put("startdate",s.startdate);
+                o.put("enddate", s.enddate);
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -349,6 +371,33 @@ class Parser {
         String res = "https://domipoke.github.io/PingPongScoreboard?matchid=" + web_id;
         Utils.Log(web_id);
         Utils.Log(res);
+        return res;
+    }
+
+    public static ArrayList<Map<String,List<String>>> GameFileTobeFilteredString(Context ctx) {
+        ArrayList res = new ArrayList<>();
+        List<String> l = Arrays.stream(Objects.requireNonNull(new File(ctx.getExternalFilesDir("games").toURI()).listFiles())).map(x -> (Arrays.toString(x.getName().split(".json"))).replaceAll("[^a-zA-Z]", "")).collect(Collectors.toList());
+        l.forEach(el->{
+            try {
+                String s = Parser.read(new File(ctx.getExternalFilesDir("games")+"/"+File.separator+el+".json"));
+                Game g = (Game) Parser.parseString(s).get(0);
+                Map<String,List<String>> o = new HashMap<>();
+                ArrayList<String> a = new ArrayList<String>();
+                g.players.forEach(p ->{
+                    if (Utils.notEmpty(p.name)) {
+                        a.add(p.name);
+                    }
+                });
+                o.put("players",a);
+                List<String> file = new ArrayList<>();
+                file.add(el+".json");
+                o.put("filename",file);
+                res.add(o);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
+        //
         return res;
     }
 }

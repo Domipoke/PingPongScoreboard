@@ -104,4 +104,13 @@
         </TableLayout>
     </ScrollView>
 
+    <Button
+        android:id="@+id/editUser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Edit"
+        app:layout_constraintBottom_toBottomOf="@+id/profileimage"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/profileimage" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

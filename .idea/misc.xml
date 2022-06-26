@@ -16,13 +16,15 @@
         <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/activity_double_match.xml" value="0.5" />
         <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/activity_games.xml" value="0.25" />
         <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/activity_history.xml" value="0.3609375" />
-        <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/activity_home.xml" value="0.18" />
+        <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/activity_home.xml" value="0.16" />
         <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/activity_login.xml" value="0.18211752786220872" />
         <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/activity_main.xml" value="0.18958333333333333" />
         <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/activity_match.xml" value="0.18958333333333333" />
         <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/activity_menu.xml" value="0.2" />
-        <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/activity_single_match.xml" value="0.17083333333333334" />
+        <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/activity_online.xml" value="0.19166666666666668" />
+        <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/activity_single_match.xml" value="0.33" />
         <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/activity_user_page.xml" value="0.25" />
+        <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/activity_watch_match.xml" value="0.375" />
         <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/content_home.xml" value="0.18958333333333333" />
         <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/fragment_first.xml" value="0.18958333333333333" />
         <entry key="..\:/DesktopDomenico/bot/PingPongScoreboard/app/src/main/res/layout/fragment_second.xml" value="0.18958333333333333" />

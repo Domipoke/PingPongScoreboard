@@ -60,14 +60,26 @@
 
     <Button
         android:id="@+id/startmatch"
-        android:layout_width="134dp"
+        android:layout_width="0dp"
         android:layout_height="54dp"
         android:layout_marginTop="48dp"
         android:text="@string/inizia"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="@+id/fastgameplayer3"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/fastgameplayer3"
+        app:layout_constraintTop_toBottomOf="@+id/fastgameplayer3" />
+
+    <Button
+        android:id="@+id/continua"
+        android:layout_width="0dp"
+        android:layout_height="54dp"
+        android:layout_marginTop="48dp"
+        android:text="@string/continua"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="@+id/fastgameplayer4"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/fastgameplayer4"
         app:layout_constraintTop_toBottomOf="@+id/fastgameplayer3" />
 
     <Button
@@ -77,8 +89,19 @@
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:maxLength="18"
-        android:text="Google"
+        android:text="@string/google"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/startOnline"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/online"
+        android:textSize="20sp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="@+id/continua"
+        app:layout_constraintStart_toStartOf="@+id/startmatch"
+        app:layout_constraintTop_toBottomOf="@+id/startmatch" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

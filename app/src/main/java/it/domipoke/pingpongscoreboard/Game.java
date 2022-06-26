@@ -3,13 +3,18 @@ package it.domipoke.pingpongscoreboard;
 import android.content.Context;
 import android.graphics.Color;
 
-import androidx.appcompat.app.AlertDialog;
+import org.json.JSONException;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 class Game {
@@ -25,6 +30,8 @@ class Game {
     public List<Set> sets;
     public Set currentset;
     public String web_id;
+    public String updates;
+    public String admin_uid;
 
 
     public Game() {
@@ -40,6 +47,8 @@ class Game {
       sets=new ArrayList<Set>();
       currentset=new Set();
       settings=new Settings();
+      web_id=null;
+      admin_uid=null;
    }
 
    public void DefaultSetSingle() {
@@ -93,6 +102,78 @@ class Game {
         m.put("sets", Set.toMapList(this.sets));
         m.put("settings", Settings.toMap(this.settings));
         m.put("web_id", this.web_id);
+        m.put("updates",this.updates);
         return m;
+    }
+
+    public boolean save(File path, String n) {
+        File g = new File(path +"/"+File.separator+n+".json");
+        if (!exists(path, n)) {
+            try {
+                g.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        try {
+            String s = Parser.StringifyGame(this);
+            FileWriter fw = new FileWriter(g);
+            fw.write(s);
+            fw.close();
+
+        } catch (JSONException | IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public boolean exists(File path, String n) {
+        File g = new File(path +"/"+File.separator+n+".json");
+        return g.exists();
+    }
+
+    public String generateNewName(Context ctx) {
+        File fgs = ctx.getExternalFilesDir("games");
+        List<String> games = Arrays.stream(Objects.requireNonNull(new File(fgs.toURI()).listFiles())).map(x -> (Arrays.toString(x.getName().split(".json"))).replaceAll("[^a-zA-Z0-9]", "")).collect(Collectors.toList());
+        List<String> cgames = games.stream().map(x->x.replaceAll("matchn[0-9]*","")).collect(Collectors.toList());
+        StringBuilder title = new StringBuilder();
+        switch (this.howmanyPlayers()) {
+            case 4:
+                title
+                        .append(this.players.get(0).name)
+                        .append("_")
+                        .append(this.players.get(2).name)
+                        .append("vs")
+                        .append(this.players.get(1).name)
+                        .append("_")
+                        .append(this.players.get(3).name);
+            default:
+                title
+                        .append(this.players.get(0).name)
+                        .append("vs")
+                        .append(this.players.get(1).name);
+        }
+        if (!cgames.contains(title.toString())) {
+            return title.toString();
+        } else {
+            List<String> fil = games.stream().filter(x->x.matches(title.toString())).map(x->x.replaceAll(title.toString(),"")).collect(Collectors.toList());
+            List<Integer> collect = fil.stream().map(x -> x.replaceAll("[A-Za-z]*matchn","0")).map(x->{
+                if (!x.equalsIgnoreCase("")) {
+                    return Integer.parseInt(x);
+                } else {
+                    return 0;
+                }
+            }).collect(Collectors.toList());
+            Integer last = collect.stream().filter(x -> x >= 0).max(Integer::compare).orElse(0);
+            title.append("matchn").append(String.valueOf(last+1));
+            return title.toString();
+        }
+    }
+
+    public void updateCurrentSet() {
+        this.currentset.score1=this.score1;
+        this.currentset.score2=this.score2;
     }
 }

@@ -68,4 +68,12 @@
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
+    <string name="condividi">condividi</string>
+    <string name="onlinegameplayer1">onlinegameplayer1</string>
+    <string name="onlinegameplayer2">onlinegameplayer2</string>
+    <string name="onlinegameplayer3">onlinegameplayer3</string>
+    <string name="onlinegameplayer4">onlinegameplayer4</string>
+    <string name="online">Online</string>
+    <string name="google">Google</string>
+    <string name="continua">continua</string>
 </resources>

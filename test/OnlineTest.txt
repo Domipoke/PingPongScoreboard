@@ -1,0 +1,168 @@
+package it.domipoke.pingpongscoreboard;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.nfc.NfcAdapter;
+import android.os.Build;
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.Toast;
+
+import com.google.android.gms.nearby.Nearby;
+import com.google.android.gms.nearby.messages.BleSignal;
+import com.google.android.gms.nearby.messages.Distance;
+import com.google.android.gms.nearby.messages.Message;
+import com.google.android.gms.nearby.messages.MessageListener;
+import com.google.android.gms.nearby.messages.PublishCallback;
+import com.google.android.gms.nearby.messages.PublishOptions;
+import com.google.android.gms.nearby.messages.Strategy;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import it.domipoke.pingpongscoreboard.databinding.ActivityOnlineBinding;
+
+public class Online extends AppCompatActivity {
+    private static final int PERMISSION_REQUEST_CODE = 1;
+
+    // 1-3 vs 2-4
+    Button pl1;
+    Button pl2;
+    Button pl3;
+    Button pl4;
+
+    NfcAdapter nfcAdapter;
+    boolean writeMode;
+
+    int TTL_IN_SECONDS = 120;
+    ActivityOnlineBinding binding;
+    Strategy PUB_SUB_STRATEGY = new Strategy.Builder().setTtlSeconds(TTL_IN_SECONDS).build();
+    Message message;
+    MessageListener messageListener;
+    ArrayList<Map<String, Object>> Users = new ArrayList<>(4);
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_online);
+
+        /*
+        binding = ActivityOnlineBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        */
+
+
+        findViewById(R.id.nfc).setOnClickListener(v -> {
+            if (true) {
+                // Ask for permission and to active nfc. On phone contact transfer data to each other
+                canNFC();
+                setupNFC();
+                //Open a Dialog where app ask if user want to HOST or JOIN
+                // - Only one can Host
+                // - Max 3 player can join
+                // - About everyone can spectate
+                // openDialogJoinHost();
+                // Search other users in proximity
+                // searchUsers();
+                // Click and open dialog in order to change player team
+                // setupPLButton();
+                //
+            }
+        });
+    }
+
+    public boolean canNFC() {
+        for (String p : new String[]{Manifest.permission.NFC}) {
+            if (ActivityCompat.checkSelfPermission(this, p) == PackageManager.PERMISSION_DENIED) {
+                ActivityCompat.requestPermissions(Online.this, new String[]{p}, PERMISSION_REQUEST_CODE);
+            }
+        }
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        if (nfcAdapter == null) {
+            Utils.FastToast(this, "NFC non è disponibile", Toast.LENGTH_LONG);
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public void setupNFC() {
+        // create an intent with tag data and deliver to this activity
+        message = new Message(Build.MODEL.getBytes(StandardCharsets.UTF_8));
+        messageListener = new MessageListener() {
+            @Override
+            public void onFound(@NonNull Message message) {
+                super.onFound(message);
+                String msgBody = Arrays.toString(message.getContent());
+                int i = Utils.GetIndex(Users, "msgBody" , msgBody);
+                if (i==-1) {
+                    Map<String,Object> m = new HashMap<>();
+                    m.put("msgBody",msgBody);
+                    System.out.println(msgBody);
+                    Users.add(m);
+                }
+            }
+
+            @Override
+            public void onLost(@NonNull Message message) {
+                super.onLost(message);
+            }
+
+            @Override
+            public void onDistanceChanged(@NonNull Message message, @NonNull Distance distance) {
+                super.onDistanceChanged(message, distance);
+            }
+
+            @Override
+            public void onBleSignalChanged(@NonNull Message message, @NonNull BleSignal bleSignal) {
+                super.onBleSignalChanged(message, bleSignal);
+            }
+        };
+
+
+    }
+
+    private boolean findUser(String msgBody) {
+        AtomicBoolean res = new AtomicBoolean(false);
+        Users.forEach(x->{
+            if (x.get("msgBody")!=null) {
+                if (x.get("msgBody")==msgBody) {
+                    res.set(true);
+                }
+            }
+        });
+        return res.get();
+    }
+
+
+    // Actions
+    public void publish() {
+        PublishOptions opt = new PublishOptions.Builder()
+                .setStrategy(PUB_SUB_STRATEGY)
+                .setCallback(new PublishCallback(){
+                    @Override
+                    public void onExpired() {
+                        super.onExpired();
+
+                    }
+                }).build();
+        Nearby.getMessagesClient(this).publish(message, opt);
+    }
+    public void unpublish() {
+        // TODO: 20/06/2022 Not yet implemented;
+    }
+    public void subscribe() {
+        // TODO: 20/06/2022 Not yet implemented;
+    }
+    public void unsubscribe() {
+        // TODO: 20/06/2022 Not yet implemented;
+    }
+}

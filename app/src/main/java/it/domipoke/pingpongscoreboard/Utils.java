@@ -2,11 +2,18 @@ package it.domipoke.pingpongscoreboard;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.view.View;
+import android.content.Intent;
+import android.os.Environment;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 class Utils {
    public static void FastToast(Context ctx, String text, int duration) {
@@ -51,5 +58,38 @@ class Utils {
         return !isEven(i);
    }
 
+    public static boolean notEmpty(String s) {
+       return (s!=null&& !s.equals(""));
+    }
 
+    public static int GetIndex(ArrayList<Map<String, Object>> arr, String key, String equalto) {
+       AtomicInteger res = new AtomicInteger(-1);
+       arr.forEach((obj) ->{if (obj.get(key)==equalto) {res.set(arr.indexOf(obj));}});
+       return res.get();
+    }
+    public static void SendLogcatMail(Context ctx){
+
+        // save logcat in file
+        File outputFile = new File(ctx.getExternalFilesDir("log"),
+                "logcat.txt");
+        try {
+            Runtime.getRuntime().exec(
+                    "logcat -f " + outputFile.getAbsolutePath());
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        //send file using email
+        Intent emailIntent = new Intent(Intent.ACTION_SEND);
+        // Set type to "email"
+        emailIntent.setType("vnd.android.cursor.dir/email");
+        String to[] = {"domenico.montuori1312006@gmail.com"};
+        emailIntent .putExtra(Intent.EXTRA_EMAIL, to);
+        // the attachment
+        emailIntent .putExtra(Intent.EXTRA_STREAM, outputFile.getAbsolutePath());
+        // the mail subject
+        emailIntent .putExtra(Intent.EXTRA_SUBJECT, "Subject");
+        ctx.startActivity(Intent.createChooser(emailIntent , "Send email..."));
+    }
 }

@@ -11,11 +11,13 @@ class Settings {
     public boolean switch_side_each_set;
     public int winning_at;
     public int change_serve_each;
+    public boolean ask_before_new_set;
 
     public Settings() {
         switch_side_each_set=true;
         winning_at=11;
         change_serve_each=2;
+        ask_before_new_set=true;
     }
 
     public static Settings DefaultSingle() {
@@ -23,6 +25,7 @@ class Settings {
         s.switch_side_each_set=true;
         s.winning_at=SINGLE_WINNING_POINTS;
         s.change_serve_each=2;
+        s.ask_before_new_set=true;
         return s;
     }
 
@@ -31,6 +34,7 @@ class Settings {
         s.switch_side_each_set=true;
         s.winning_at=DOUBLE_WINNING_POINTS;
         s.change_serve_each=5;
+        s.ask_before_new_set=true;
         return s;
     }
 

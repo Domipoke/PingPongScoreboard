@@ -1,5 +1,6 @@
 package it.domipoke.pingpongscoreboard;
 
+import android.content.Context;
 import android.graphics.Color;
 
 import org.json.JSONException;
@@ -83,5 +84,17 @@ class Player {
             System.out.println(p.toURI()+" not Exist" );
         }
         return null;
+    }
+
+    public boolean isValidToBePlayed(Context ctx) {
+        try {
+            if (
+                    Type.isColorResource(ctx,this.color)&&
+                            this.name.replaceAll("[^a-zA-Z]", "").length()>0
+            ) return true;
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

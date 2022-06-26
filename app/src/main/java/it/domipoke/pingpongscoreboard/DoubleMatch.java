@@ -15,6 +15,7 @@ import android.widget.TextView;
 import org.json.JSONException;
 import org.w3c.dom.Text;
 
+import java.io.IOException;
 import java.text.BreakIterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,6 +45,10 @@ public class DoubleMatch extends AppCompatActivity {
     public int firstPlayerReceive;
 
     public TextView updates;
+    public boolean share;
+    public String wid;
+
+    public Last l;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,10 +56,24 @@ public class DoubleMatch extends AppCompatActivity {
         setContentView(R.layout.activity_single_match);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         Bundle b = getIntent().getExtras();
+        share = (boolean) b.get("share");
         String s = b.get("game").toString();
         Utils.Log("Double Match -> s :"+s);
         List<Game> gs = Parser.parseString(s);
         g = gs.get(0);
+        l = new Last(this);
+        if (share) {
+            wid = (String) b.get("web_id");
+            g.web_id = wid;
+        }
+        try {
+            l.updateLastGame(g);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         try {
             Utils.Log("Double Match -> p :"+Parser.StringifyPlayer(g.players));
         } catch (JSONException e) {
@@ -92,8 +111,10 @@ public class DoubleMatch extends AppCompatActivity {
     private void startSet() {
         setSide();
         g.set=g.sets.size();
-        firstPlayerServe = Utils.random(new int[]{1, 3});
+        firstPlayerServe = Utils.random(new int[]{0, 3}); // Before was 1,3
 
+        pl1.setBackgroundColor(g.players.get(0).color);
+        pl2.setBackgroundColor(g.players.get(1).color);
         updateScoreText();
         baddpl1.setOnClickListener(view -> {g.updateScore(1, 1, this);updateScoreText();});
         baddpl2.setOnClickListener(view -> {g.updateScore(2, 1, this);updateScoreText();});
@@ -110,8 +131,9 @@ public class DoubleMatch extends AppCompatActivity {
             String t = PingPongRuleChecker.WhoServesDouble(this.g, PingPongRuleChecker.RETURN_TYPE_STRING).toString();
             Utils.Log(t);
             upddouble.setText(t);
-        } finally {
-
+            g.updates=t;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         ((TextView) findViewById(R.id.setwonby1)).setText(String.valueOf(g.sets.stream().filter(x->x.score1>x.score2).count()));
         ((TextView) findViewById(R.id.setwonby2)).setText(String.valueOf(g.sets.stream().filter(x->x.score2>x.score1).count()));
@@ -131,7 +153,20 @@ public class DoubleMatch extends AppCompatActivity {
             b3.setNegativeButton("NO", (dI3,i3)-> dI3.cancel());
             b3.create().show();
         }
-
+        if (share) {
+            FireDataBase db = new FireDataBase();
+            db.updateGame(wid, g);
+            g.save(this.getExternalFilesDir("games"), wid);
+        } else {
+            g.save(this.getExternalFilesDir("games"), g.generateNewName(this));
+        }
+        try {
+            l.updateLastGame(g);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
 

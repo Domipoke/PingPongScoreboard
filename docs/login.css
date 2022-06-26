@@ -1,0 +1,41 @@
+.login-frame {
+    --dim: 400px;  
+    --bgcolor: #eee;
+    --pptcolor: #328586;
+    --bgopacity: 0.5;
+    --top-distance: 10%;
+    --blur-effect: 0px;
+    --ppt-x-y: calc(274/152.5); 
+    --ppt-dim: 800px;
+    /**/
+    position:relative;
+    top: var(--top-distance);
+    left: calc(50% - var(--dim)/2);
+    
+}
+.login-form {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: var(--bgcolor);
+    backdrop-filter: blur(var(--blur-effect));
+    opacity: var(--bgopacity);
+    width: var(--dim);
+    height: var(--dim);
+    display: block;
+}
+
+.login-ppt {
+    position: absolute;
+    top: 0;
+    left: calc(-1 * var(--dim)/2);
+    background-color: var(--pptcolor);
+    width: var(--ppt-dim);
+    height: calc(var(--ppt-dim) / var(--ppt-x-y));
+    z-index: -1;
+    transform: rotateX(60deg) rotateY(0deg) rotateZ(-45deg);
+}
+
+
+
+/*body {background-color: blue;}/**/

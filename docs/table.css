@@ -1,0 +1,17 @@
+:root {
+    --bl: #222;
+}
+#t {
+    padding: 5px;
+}
+#t, .tbody, tr, td {
+    color: var(--bl);
+    font-size: 24px;
+    font-family: 'Quicksand',sans-serif;
+    border-color: var(--bl);
+    border-width: 3px;
+    border-style: solid;    
+    border-collapse: collapse;
+}
+td {padding:10px}
+
