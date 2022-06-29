@@ -1,7 +1,7 @@
 :root {
     --pdd: 10px;
 }
-.menu-item-span {
+#menu .menu-item-span {
     color: white;
     font-size: 24px;
     text-decoration: none;
@@ -22,7 +22,7 @@
     border-bottom-color: #222;
     */
 }
-.menu-item-image {
+#menu .menu-item-image {
     width: 32px;
     height: 32px;
     padding: var(--pdd);
@@ -34,7 +34,7 @@
     /*box-shadow: none|h-offset v-offset blur spread color |inset|initial|inherit;*/
 }
 
-.menu-item-span:hover {
+#menu .menu-item-span:hover {
     background-color: white;
     color: #222;
     box-shadow: inset 0px -50px 50px -50px #222;
@@ -44,4 +44,8 @@
     border-bottom-color: #222;
     
     */
+}
+#menu .rounded {
+    border-radius: 0px solid transparent;
+    border-radius: 50%;
 }

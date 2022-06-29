@@ -1,15 +1,12 @@
 <html>
     <head>
-        <link type="text/css" rel="stylesheet" href="./all.css">
-        <link type="text/css" rel="stylesheet" href="./style.css">
-        <link type="text/css" rel="stylesheet" href="./menu.css">
+        <link type="text/css" rel="stylesheet" href="./css/all.css">
+        <link type="text/css" rel="stylesheet" href="./css/style.css">
+        <link type="text/css" rel="stylesheet" href="./css/scrollbar.css">
+        <link type="text/css" rel="stylesheet" href="./css/table.css">
     </head>
 <body>
-    <div id="menu">
-        <img src="/logo.svg" id="menu-item-image" class="rounded">
-        <a href="/match.html" id="menu-item-span">Match</a>
-        <a href="/user.html" id="menu-item-span">User</a>
-      </div>
+    <custom-menu></custom-menu>
     <table id="match" match="">
       <tr><span id="updates"></span></tr>
       <tr><td id="tag">Player: <span></span></td><td id="name1"><td><td id="name2"></td></tr>
@@ -18,22 +15,28 @@
     </table>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="./customElement.js"></script>
     <script>
-        var config = {
-          apiKey: "AIzaSyCnyVeuMNfIEPrB4GFnU3gepf6FMRctrWw",
-          //authDomain: "PROJECT_ID.firebaseapp.com",
-          // The value of `databaseURL` depends on the location of the database
-          databaseURL: "https://gp4e-6a225.firebaseio.com",
-          projectId: "gp4e-6a225",
-          storageBucket: "gp4e-6a225.appspot.com",
-          //messagingSenderId: "SENDER_ID",
-          //appId: "APP_ID",
-          // For Firebase JavaScript SDK v7.20.0 and later, `measurementId` is an optional field
-          //measurementId: "G-MEASUREMENT_ID",
+        var app;
+        if (firebase.apps.length===0) {
+            app=firebase.initializeApp({
+                apiKey: "AIzaSyCnyVeuMNfIEPrB4GFnU3gepf6FMRctrWw",
+                //authDomain: "PROJECT_ID.firebaseapp.com",
+                // The value of `databaseURL` depends on the location of the database
+                databaseURL: "https://gp4e-6a225.firebaseio.com",
+                projectId: "gp4e-6a225",
+                storageBucket: "gp4e-6a225.appspot.com",
+                //messagingSenderId: "SENDER_ID",
+                //appId: "APP_ID",
+                // For Firebase JavaScript SDK v7.20.0 and later, `measurementId` is an optional field
+                //measurementId: "G-MEASUREMENT_ID",
+            })
+        } else {
+            app = firebase.apps[0]
         }
-        firebase.initializeApp(config);
-        
-        
+        var user = app.auth().currentUser;
+        console.log(user)    
         function getUrlVars()  {
             var vars = [], hash;
             var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
