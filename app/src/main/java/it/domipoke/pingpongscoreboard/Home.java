@@ -542,9 +542,9 @@ public class Home extends AppCompatActivity {
         sdpl.setAdapter(adapter);
 
 
-        LinearLayout Hll = new LinearLayout(ctx);
         EditText e = new EditText(ctx);
         ListView lv = new ListView(ctx);
+        //e.setWidth(200);
         e.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -567,17 +567,28 @@ public class Home extends AppCompatActivity {
                             for (QueryDocumentSnapshot q : task.getResult()) {
                                 String nickname = (String) q.get("nickname");
                                 String email = (String) q.get("email");
+                                System.out.println("Nick -> "+nickname);
+                                System.out.println("Email -> "+email);
                                 if (nickname != null) {
                                     if (nickname.toLowerCase(Locale.ROOT).contains(t.toLowerCase(Locale.ROOT))) {
                                         possible.add(nickname);
-                                    } else if (email!=null) {
-                                        if (email.toLowerCase(Locale.ROOT).contains(t.toLowerCase(Locale.ROOT))) {
+                                    }
+                                }
+                                if (email!=null) {
+                                    if (email.toLowerCase(Locale.ROOT).contains(t.toLowerCase(Locale.ROOT))) {
+                                        if (nickname!=null) {
                                             possible.add(nickname);
+                                        } else {
+                                            possible.add(email);
                                         }
                                     }
                                 }
                             }
-                            lv.setAdapter(new ArrayAdapter(ctx, R.layout.support_simple_spinner_dropdown_item, possible));
+
+                            System.out.println(possible.size());
+                            if (possible.size()>0) {
+                                lv.setAdapter(new ArrayAdapter(ctx, R.layout.support_simple_spinner_dropdown_item, possible));
+                            }
                         }
                     });
                 }
@@ -590,15 +601,15 @@ public class Home extends AppCompatActivity {
                 e.setText(item);
             }
         });
-        Hll.setOrientation(LinearLayout.HORIZONTAL);
-        Hll.addView(e);
-        Hll.addView(lv);
+
+
 
 
 
         ll.addView(sdpl);
+        ll.addView(e);
+        ll.addView(lv);
 
-        ll.addView(Hll);
         builder.setView(ll);
 
 
@@ -620,24 +631,45 @@ public class Home extends AppCompatActivity {
             if (plname.length() > 0) {
                 if (lower.contains("from")&&lower.contains("user")) {
                     FireDataBase db = new FireDataBase();
-                    DocumentSnapshot ufn = db.findUserFromNickName(e.getText().toString());
-                    db.getPlayer(ufn, playeri, new SimpleCallback.PlayerCallBack(){
-                        @Override
-                        public void callback(Player p, int pi) {
-                            if (p!=null) {
-                                if (p.isValidToBePlayed(ctx)) {
-                                    String thatpl = btn.getText().toString();
-                                    List<String> pls = Arrays.stream(Objects.requireNonNull(new File(ctx.getExternalFilesDir("players").toURI()).listFiles())).map(x -> (Arrays.toString(x.getName().split(".json"))).replaceAll("[^a-zA-Z]", "")).collect(Collectors.toList());
-                                    if (pls.contains(thatpl) && !Savedpls.contains(thatpl)) {
-                                        Savedpls.add(thatpl);
+                    if (e.getText().toString().trim().toLowerCase(Locale.ROOT).endsWith("@gmail.com")) {
+                        DocumentSnapshot ufn = db.findUserFromEmail(e.getText().toString());
+                        db.getPlayer(ufn, playeri, new SimpleCallback.PlayerCallBack(){
+                            @Override
+                            public void callback(Player p, int pi) {
+                                if (p!=null) {
+                                    if (p.isValidToBePlayed(ctx)) {
+                                        String thatpl = btn.getText().toString();
+                                        List<String> pls = Arrays.stream(Objects.requireNonNull(new File(ctx.getExternalFilesDir("players").toURI()).listFiles())).map(x -> (Arrays.toString(x.getName().split(".json"))).replaceAll("[^a-zA-Z]", "")).collect(Collectors.toList());
+                                        if (pls.contains(thatpl) && !Savedpls.contains(thatpl)) {
+                                            Savedpls.add(thatpl);
+                                        }
+                                        btn.setBackgroundColor(p.color);
+                                        btn.setText(p.name);
+                                        g.setPlayer(pi - 1, p);
                                     }
-                                    btn.setBackgroundColor(p.color);
-                                    btn.setText(p.name);
-                                    g.setPlayer(pi - 1, p);
                                 }
                             }
-                        }
-                    });
+                        });
+                    } else {
+                        DocumentSnapshot ufn = db.findUserFromNickName(e.getText().toString());
+                        db.getPlayer(ufn, playeri, new SimpleCallback.PlayerCallBack(){
+                            @Override
+                            public void callback(Player p, int pi) {
+                                if (p!=null) {
+                                    if (p.isValidToBePlayed(ctx)) {
+                                        String thatpl = btn.getText().toString();
+                                        List<String> pls = Arrays.stream(Objects.requireNonNull(new File(ctx.getExternalFilesDir("players").toURI()).listFiles())).map(x -> (Arrays.toString(x.getName().split(".json"))).replaceAll("[^a-zA-Z]", "")).collect(Collectors.toList());
+                                        if (pls.contains(thatpl) && !Savedpls.contains(thatpl)) {
+                                            Savedpls.add(thatpl);
+                                        }
+                                        btn.setBackgroundColor(p.color);
+                                        btn.setText(p.name);
+                                        g.setPlayer(pi - 1, p);
+                                    }
+                                }
+                            }
+                        });
+                    }
                 } else {
                     pl = Player.read(this.getExternalFilesDir("players"), plname);
                     if (pl!=null) {

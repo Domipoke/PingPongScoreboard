@@ -243,11 +243,51 @@ class FireDataBase {
       return d.get();
     }
 
-   public void getPlayer(DocumentSnapshot userFromNickName, int pi, SimpleCallback.PlayerCallBack callback) {
+   public Player getPlayer(DocumentSnapshot userFromNickName, int pi, SimpleCallback.PlayerCallBack callback) {
       Player p = (Player) Parser.parseString(userFromNickName.get("player").toString()).get(0);
       callback.callback(p,pi);
+      return p;
+   }
+   public Player getPlayer(DocumentSnapshot userFromNickName) {
+      Player p = (Player) Parser.parseString(userFromNickName.get("player").toString()).get(0);
+      return p;
+   }
+   public DocumentSnapshot findUserFromUid(String uid) {
+      AtomicReference<DocumentSnapshot> d  = new AtomicReference<>();
+      db.collection("players").whereEqualTo("uid",uid).get().addOnCompleteListener(task->{
+         if (task.isSuccessful()) {
+            AtomicReference<Map<String,Object>> found = null;
+            task.getResult().getDocuments().forEach(doc->{
+               d.set(doc);
+            });
+         }
+      });
+      return d.get();
    }
 
-   public void findUserFromUid(String uid, SimpleCallback.UserFinded callback) {
+    public DocumentSnapshot findUserFromEmail(String email) {
+       AtomicReference<DocumentSnapshot> d  = new AtomicReference<>();
+       db.collection("players").whereEqualTo("email",email).get().addOnCompleteListener(task->{
+          if (task.isSuccessful()) {
+             AtomicReference<Map<String,Object>> found = null;
+             task.getResult().getDocuments().forEach(doc->{
+                d.set(doc);
+             });
+          }
+       });
+       return d.get();
+    }
+
+   public void getUser(DocumentSnapshot userds, SimpleCallback.UserFinded userFinded) {
+      User u = User.parse(userds);
+      userFinded.callback(u);
+   }
+
+   public String getUid(DocumentSnapshot ds) {
+      return ds.get("uid").toString();
+   }
+
+   public String getEmail(DocumentSnapshot ds) {
+      return ds.get("email").toString();
    }
 }

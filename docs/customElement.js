@@ -3,21 +3,40 @@ function isValid(s) {
         return true
     } else return false
 }
+function loadUser(user) {
+    var userbtn = document.createElement("div")
+    userbtn.classList.add("menu-item-span")
+    userbtn.classList.add("right")
+    var a = document.createElement("a")
+    a.setAttribute("href","/account.html")
+    a.innerHTML=user.email
+    userbtn.appendChild(a);
+    document.getElementById("login").replaceWith(userbtn)
+    document.getElementsByClassName("login-frame")[0].remove()
+}
+function Field(key,text,value) {
+    var tr = document.createElement("tr")
+    var span = document.createElement("td")
+    var spant = document.createElement("span")
+    spant.innerHTML=text;
+    span.appendChild(spant)
+    var inp = document.createElement("td")
+    var input = document.createElement("input")
+    input.setAttribute("name",key)
+    input.setAttribute("value",value)
+    inp.appendChild(input)
 
+    tr.appendChild(span)
+    tr.appendChild(inp)
+
+    return tr
+}
 class Menu extends HTMLElement {
     constructor (props) {
         super(props)
         this.appendChild(this.createMenu())
     }
-    loadUser(user) {
-        var userbtn = document.createElement("div")
-        userbtn.classList.add("menu-item-span")
-        userbtn.classList.add("right")
-        userbtn.innerHTML=user.email
-        userbtn.addEventListener("click", this.userpagediv)
-        document.getElementById("login").replaceWith(userbtn)
-        document.getElementsByClassName("login-frame")[0].remove()
-    }
+    
     
 
     setupmenu() {
@@ -87,9 +106,8 @@ class Menu extends HTMLElement {
         return d;
     }
     loginEvent() {
-        var div = this.setupmenu()
+        var div = this.setupmenu();
         if (document.getElementsByClassName(div.classList.toString()).length==0) document.body.appendChild(div)
-    
     }
     
     
@@ -101,7 +119,7 @@ class Menu extends HTMLElement {
         if (isValid(ue) && isValid(up) ) {
             //https://firebase.google.com/docs/auth/web/firebaseui
             var fa;
-            if (firebase.apps.length===0) fa=firebase.initializeApp({apiKey: "AIzaSyCnyVeuMNfIEPrB4GFnU3gepf6FMRctrWw",databaseURL: "https://gp4e-6a225.firebaseio.com",projectId: "gp4e-6a225",storageBucket: "gp4e-6a225.appspot.com",});
+            if (firebase.apps.length==0) fa=firebase.initializeApp({apiKey: "AIzaSyCnyVeuMNfIEPrB4GFnU3gepf6FMRctrWw",databaseURL: "https://gp4e-6a225.firebaseio.com",projectId: "gp4e-6a225",storageBucket: "gp4e-6a225.appspot.com",});
             else fa = firebase.apps[0]
             const app = fa;
             const auth = app.auth();
@@ -110,33 +128,31 @@ class Menu extends HTMLElement {
                 .then((userCredential) => {
                     // Signed in
                     var user = userCredential.user;
-                    this.loadUser(user)
+                    loadUser(user)
                 })
                 .catch((error) => {
                     var errorCode = error.code;
                     var errorMessage = error.message;
+                    console.log("Error in login\n",errorCode,"\n",errorMessage)
                     auth.createUserWithEmailAndPassword(ue, up)
                     .then((userCredential) => {
                         // Signed in 
                         var user = userCredential.user;
-                        this.loadUser(user)
+                        loadUser(user)
                     })
                     .catch((error) => {
-                        var errorCode = error.code;
-                        var errorMessage = error.message;
-                        // ..
+                        var errorCodes = error.code;
+                        var errorMessages = error.message;
+                        console.log("Error in Register\n",errorCodes,"\n",errorMessages)
                     });
                 });
             } else {
-                this.loadUser(auth.current0User)
+                loadUser(auth.currentUser)
             }
         }
     }
     
-    userpagediv(e) {
-        
-    }
-
+    
     createMenu() {
         var menu = document.createElement("div")
         menu.id="menu"
@@ -184,7 +200,7 @@ class Menu extends HTMLElement {
             }
             var user = app.auth().currentUser;
             console.log(user)
-            if (user) this.loadUser(user) 
+            if (user) loadUser(user) 
             else this.loginEvent()
         })
 
@@ -199,5 +215,26 @@ class Menu extends HTMLElement {
         return menu
     }
 } 
+class UP extends HTMLElement {
+    constructor (props) {
+        super(props)
+        this.addEventListener("recharge",()=>{
+            this.innerHTML=""
+            this.appendChild(this.childs())
+        })
+        this.innerHTML=""
+        this.appendChild(this.childs())
+    }
+    childs() {
+        var cu = this.getCU()
+        console.log(null)
+        if (cu!=null) {
+            var t = document.createElement("table")
+            //TODO
+            t.appendChild(Field("nickname","NickName",))
+        }
+    }
+}
 
 customElements.define("custom-menu",Menu)
+customElements.define("user-page",UP)

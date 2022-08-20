@@ -7,11 +7,11 @@
     </head>
 <body>
     <custom-menu></custom-menu>
-    <table id="match" match="">
-      <tr><span id="updates"></span></tr>
-      <tr><td id="tag">Player: <span></span></td><td id="name1"><td><td id="name2"></td></tr>
-      <tr><td id="tag">Set: <span></span></td><td id="set1"><td><td id="set2"></td></tr>
-      <tr><td id="tag">Score: <span></span></td><td id="score1"><td><td id="score2"></td></tr>
+    <table class="match" match="">
+      <tr><span class="updates"></span></tr>
+      <tr><td class="tag">Player: <span></span></td><td class="name1"><td><td class="name2"></td></tr>
+      <tr><td class="tag">Set: <span></span></td><td class="set1"><td><td class="set2"></td></tr>
+      <tr><td class="tag">Score: <span></span></td><td class="score1"><td><td class="score2"></td></tr>
     </table>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -22,15 +22,15 @@
         if (firebase.apps.length===0) {
             app=firebase.initializeApp({
                 apiKey: "AIzaSyCnyVeuMNfIEPrB4GFnU3gepf6FMRctrWw",
-                //authDomain: "PROJECT_ID.firebaseapp.com",
+                //authDomain: "PROJECT_class.firebaseapp.com",
                 // The value of `databaseURL` depends on the location of the database
                 databaseURL: "https://gp4e-6a225.firebaseio.com",
-                projectId: "gp4e-6a225",
+                projectclass: "gp4e-6a225",
                 storageBucket: "gp4e-6a225.appspot.com",
-                //messagingSenderId: "SENDER_ID",
-                //appId: "APP_ID",
-                // For Firebase JavaScript SDK v7.20.0 and later, `measurementId` is an optional field
-                //measurementId: "G-MEASUREMENT_ID",
+                //messagingSenderclass: "SENDER_class",
+                //appclass: "APP_class",
+                // For Firebase JavaScript SDK v7.20.0 and later, `measurementclass` is an optional field
+                //measurementclass: "G-MEASUREMENT_class",
             })
         } else {
             app = firebase.apps[0]
@@ -56,8 +56,8 @@
             return '#'+ ('000000' + (c & 0xFFFFFF).toString(16)).slice(-6);
         }
         const db = firebase.firestore();
-        var id=getUrlVars()["matchid"];
-        db.collection("matches").doc(id).onSnapshot((doc) => {
+        var class=getUrlVars()["matchclass"];
+        db.collection("matches").doc(class).onSnapshot((doc) => {
             var data = doc.data()
             console.log(data)
             var sets = data["sets"]
@@ -84,18 +84,18 @@
                 colorToHex(selpl(pl,0)["color"]),
                 colorToHex(selpl(pl,1)["color"])
             ]
-            document.getElementById("name1").innerHTML=team1.toUpperCase()
-            document.getElementById("name1").style.backgroundColor = color[0]
-            document.getElementById("name2").innerHTML=team2.toUpperCase()
-            document.getElementById("name2").style.backgroundColor = color[1]
+            document.getElementsByClassName("name1")[0].innerHTML=team1.toUpperCase()
+            document.getElementsByClassName("name1")[0].style.backgroundColor = color[0]
+            document.getElementsByClassName("name2")[0].innerHTML=team2.toUpperCase()
+            document.getElementsByClassName("name2")[0].style.backgroundColor = color[1]
 
-            document.getElementById("set1").innerHTML=w1
-            document.getElementById("set2").innerHTML=w2
+            document.getElementsByClassName("set1")[0].innerHTML=w1
+            document.getElementsByClassName("set2")[0].innerHTML=w2
 
-            document.getElementById("score1").innerHTML=data["score1"]
-            document.getElementById("score2").innerHTML=data["score2"]
+            document.getElementsByClassName("score1")[0].innerHTML=data["score1"]
+            document.getElementsByClassName("score2")[0].innerHTML=data["score2"]
             
-            document.getElementById("updates").innerHTML=data["updates"]
+            document.getElementsByClassName("updates")[0].innerHTML=data["updates"]
         });
     </script>
 </body>

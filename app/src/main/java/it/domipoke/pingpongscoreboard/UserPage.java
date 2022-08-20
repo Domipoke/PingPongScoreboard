@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 public class UserPage extends AppCompatActivity {
 
@@ -65,9 +66,10 @@ public class UserPage extends AppCompatActivity {
             PlayerName.setText(p.name);
             PlayerColor.setBackgroundColor(p.color);
         }
-
+/*
         findViewById(R.id.editUser).setOnClickListener(v->{
-            db.findUserFromUid(FirebaseAuth.getInstance().getCurrentUser().getUid(), new SimpleCallback.UserFinded() {
+            DocumentSnapshot userds = db.findUserFromUid(FirebaseAuth.getInstance().getCurrentUser().getUid());
+            db.getUser(userds,  new SimpleCallback.UserFinded() {
                 @Override
                 public void callback(User u) {
                     AlertDialog.Builder bb = new AlertDialog.Builder(ctx);
@@ -75,18 +77,22 @@ public class UserPage extends AppCompatActivity {
                     LinearLayout Vll = new LinearLayout(c);
 
                     //PlName EditText
-                    LinearLayout Nickname = Layout.newField(c,"Nickname",);
-                    Vll.addView();
+                    Vll.addView(Layout.newField(c,"Display Name",u.u.getDisplayName()));
+                    Vll.addView(Layout.newField(c,"Nickname",u.p.name));
+                    Vll.addView(Layout.newField(c,"Email",u.email));
+                    Vll.addView(Layout.newField(c,"Uid",u.uid));
+
                     bb.setView(Vll);
                     bb.setPositiveButton("Save", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
 
                         }
-                    })
+                    });
                     bb.create().show();
                 }
             });
         });
+ */
     }
 }

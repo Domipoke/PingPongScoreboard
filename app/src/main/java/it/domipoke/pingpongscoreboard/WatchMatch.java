@@ -32,6 +32,7 @@ public class WatchMatch extends AppCompatActivity {
         if (player.get("player"+(i+1))!=null) {return (Map<String, Object>) player.get("player"+(i+1));}
         else {return (Map<String, Object>) player.get(i);}
     }
+
     private void SetupListener() {
         FirebaseFirestore db = new FireDataBase().db;
         AtomicReference<ConstraintLayout> watchpl1 = new AtomicReference<>(findViewById(R.id.watchpl1));
