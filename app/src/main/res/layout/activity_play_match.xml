@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/matchcl"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:fitsSystemWindows="true"
+    tools:context=".Intent.PlayMatch">
+
+    <TextView
+        android:id="@+id/updatesmatch"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:textAlignment="center"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toStartOf="@id/sharematch"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <Button
+        android:id="@+id/sharematch"
+        style="@style/TextAppearance.AppCompat.Widget.Button.Colored"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@android:drawable/ic_menu_share"
+        android:contentDescription="@string/condividi"
+        app:layout_constraintBottom_toBottomOf="@+id/updatesmatch"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/updatesmatch"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/pl1"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/pl2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/updatesmatch"
+        tools:ignore="SpeakableTextPresentCheck">
+
+        <TextView
+            android:id="@+id/setwonby1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/chakra_petch_bold"
+            android:text="0"
+            android:textSize="34sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/Tscore1"
+
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#00FFFFFF"
+            android:fontFamily="@font/chakra_petch_bold"
+            android:gravity="center"
+
+            android:includeFontPadding="false"
+            android:lineSpacingExtra="0dp"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textSize="130sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0"
+            tools:ignore="SpeakableTextPresentCheck" />
+
+        <Button
+            android:id="@+id/baddpl1"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#00FFFFFF"
+            android:contentDescription="@string/aggiungi_un_punto_alla_squadra_1"
+            android:text=""
+            app:layout_constraintBottom_toTopOf="@id/brempl1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="DuplicateClickableBoundsCheck" />
+
+        <Button
+            android:id="@+id/brempl1"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#00FFFFFF"
+            android:contentDescription="@string/togli_un_punto_alla_squadra_1"
+            android:text=""
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/baddpl1" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/pl2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#00FFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/pl1"
+        app:layout_constraintTop_toBottomOf="@+id/updatesmatch">
+
+        <TextView
+            android:id="@+id/setwonby2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/chakra_petch_bold"
+            android:text="0"
+            android:textSize="34sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/Tscore2"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="#00FFFFFF"
+            android:fontFamily="@font/chakra_petch_bold"
+            android:gravity="center"
+            android:textSize="130sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0"
+            tools:ignore="SpeakableTextPresentCheck" />
+
+        <Button
+            android:id="@+id/baddpl2"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#00FFFFFF"
+            android:contentDescription="@string/aggiungi_un_punto_alla_squadra_2"
+            android:text=""
+            app:layout_constraintBottom_toTopOf="@id/brempl2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/brempl2"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#00FFFFFF"
+            android:contentDescription="@string/togli_un_punto_alla_squadra_2"
+            android:text=""
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/baddpl2" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
